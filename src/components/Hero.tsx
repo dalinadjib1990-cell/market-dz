@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, MapPin, Car, Star } from 'lucide-react';
+import { Search, MapPin, Car, Star, PlusSquare } from 'lucide-react';
 import { BRANDS, WILAYAS } from '../constants/data';
 
 export default function Hero() {
