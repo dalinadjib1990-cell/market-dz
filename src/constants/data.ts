@@ -41,6 +41,8 @@ export const ENGINES = ["1.1", "1.2", "1.4", "1.5", "1.6", "1.9", "2.0", "HDI", 
 
 export const GEARBOXES = ["يدوي (Manuelle)", "أوتوماتيكي (Automatique)"];
 
+export const YEARS = Array.from({ length: 2026 - 1950 + 1 }, (_, i) => (2026 - i).toString());
+
 export const AD_TEMPLATES = [
   { id: 'commercial', name: 'تجاري', class: 'border-brand-green shadow-brand-green/20' },
   { id: 'attractive', name: 'جذاب', class: 'border-brand-red shadow-brand-red/20' },

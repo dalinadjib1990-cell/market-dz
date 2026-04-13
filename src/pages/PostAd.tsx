@@ -4,7 +4,7 @@ import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { useAuth } from '../hooks/useAuth';
 import { uploadToCloudinary } from '../lib/cloudinary';
-import { BRANDS, MODELS, WILAYAS, FUEL_TYPES, CONDITIONS, REPAIR_OPTIONS, ENGINES, GEARBOXES, AD_TEMPLATES } from '../constants/data';
+import { BRANDS, MODELS, WILAYAS, FUEL_TYPES, CONDITIONS, REPAIR_OPTIONS, ENGINES, GEARBOXES, AD_TEMPLATES, YEARS } from '../constants/data';
 import { Camera, X, Loader2, CheckCircle2, AlertCircle, PlusSquare, Info, ShieldCheck, Zap, Star } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '../lib/utils';
@@ -336,15 +336,15 @@ export default function PostAd() {
 
             <div className="space-y-2">
               <label className="text-xs font-bold text-white/40 uppercase tracking-widest">سنة الصنع</label>
-              <input
+              <select
                 required
-                type="number"
-                min="1950"
-                max={new Date().getFullYear()}
                 value={formData.year}
                 onChange={(e) => setFormData({ ...formData, year: Number(e.target.value) })}
-                className="input-field"
-              />
+                className="input-field appearance-none"
+              >
+                <option value="">اختر السنة</option>
+                {YEARS.map(y => <option key={y} value={y}>{y}</option>)}
+              </select>
             </div>
 
             <div className="space-y-2">
