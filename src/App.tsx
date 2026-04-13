@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import Header from './components/Header';
+import MobileNav from './components/MobileNav';
 import Home from './pages/Home';
 import Search from './pages/Search';
 import PostAd from './pages/PostAd';
@@ -26,7 +27,7 @@ export default function App() {
     <Router>
       <div className="min-h-screen bg-[#0a0a0a] flex flex-col">
         <Header />
-        <main className="flex-1">
+        <main className="flex-1 pb-20 md:pb-0">
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/search" element={<Search />} />
@@ -37,7 +38,8 @@ export default function App() {
             <Route path="/messages" element={<Messages />} />
           </Routes>
         </main>
-        <footer className="bg-[#0a0a0a] border-t border-white/10 py-12">
+        <MobileNav />
+        <footer className="bg-[#0a0a0a] border-t border-white/10 py-12 hidden md:block">
           <div className="max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-4 gap-12">
             <div className="space-y-4">
               <div className="flex items-center gap-2">

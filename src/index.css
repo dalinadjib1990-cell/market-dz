@@ -6,6 +6,7 @@
   --color-brand-white: #ffffff;
   
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --breakpoint-xs: 400px;
 }
 
 @layer base {

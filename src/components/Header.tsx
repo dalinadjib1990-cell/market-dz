@@ -34,28 +34,36 @@ export default function Header() {
           <Link to="/verified" className="text-sm font-medium hover:text-brand-green transition-colors">سيارات موثوقة</Link>
         </nav>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 sm:gap-4">
           {user ? (
             <>
-              <Link to="/messages" className="p-2 hover:bg-white/5 rounded-full transition-colors relative">
+              <Link to="/messages" className="p-2 hover:bg-white/5 rounded-full transition-colors relative hidden xs:flex">
                 <MessageSquare size={20} />
                 <span className="absolute top-1 right-1 w-2 h-2 bg-brand-red rounded-full"></span>
               </Link>
-              <Link to="/post" className="hidden sm:flex items-center gap-2 btn-primary !py-2 !px-4 text-sm">
+              <Link to="/post" className="flex items-center gap-2 btn-primary !py-2 !px-3 sm:!px-6 text-xs sm:text-sm whitespace-nowrap">
                 <PlusSquare size={18} />
-                أضف إعلان
+                <span>أضف إعلان</span>
               </Link>
               <div className="group relative">
                 <button className="w-10 h-10 rounded-full overflow-hidden border-2 border-white/10 hover:border-brand-green transition-colors">
                   <img src={profile?.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.uid}`} alt="Profile" />
                 </button>
-                <div className="absolute left-0 top-full mt-2 w-48 glass-card p-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
-                  <Link to="/profile" className="flex items-center gap-2 p-2 hover:bg-white/5 rounded-lg text-sm">
-                    <User size={16} />
-                    حسابي
+                <div className="absolute left-0 top-full mt-2 w-56 glass-card p-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all shadow-2xl z-[100]">
+                  <div className="px-3 py-3 border-b border-white/5 mb-2">
+                    <p className="text-sm font-bold truncate">{profile?.firstName} {profile?.lastName}</p>
+                    <p className="text-[10px] text-white/40 truncate">{user.email}</p>
+                  </div>
+                  <Link to="/profile" className="flex items-center gap-2 p-2.5 hover:bg-white/5 rounded-lg text-sm transition-colors">
+                    <User size={18} />
+                    حسابي الشخصي
                   </Link>
-                  <button onClick={handleLogout} className="w-full flex items-center gap-2 p-2 hover:bg-brand-red/10 text-brand-red rounded-lg text-sm">
-                    <LogOut size={16} />
+                  <Link to="/messages" className="flex xs:hidden items-center gap-2 p-2.5 hover:bg-white/5 rounded-lg text-sm transition-colors">
+                    <MessageSquare size={18} />
+                    الرسائل
+                  </Link>
+                  <button onClick={handleLogout} className="w-full flex items-center gap-2 p-2.5 hover:bg-brand-red/10 text-brand-red rounded-lg text-sm transition-colors mt-1">
+                    <LogOut size={18} />
                     تسجيل الخروج
                   </button>
                 </div>

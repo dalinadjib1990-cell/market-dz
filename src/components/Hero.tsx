@@ -41,6 +41,15 @@ export default function Hero() {
           <p className="text-xl md:text-2xl text-white/60 max-w-3xl mx-auto font-medium leading-relaxed">
             اكتشف آلاف العروض يومياً. بيع وشراء السيارات أصبح أسهل، أسرع، وأكثر أماناً مع <span className="text-white font-bold">Market Auto DZ</span>.
           </p>
+          <div className="pt-4">
+            <button 
+              onClick={() => navigate('/post')}
+              className="btn-primary !py-4 !px-10 text-xl shadow-[0_0_30px_rgba(0,102,51,0.3)] hover:scale-105 transition-all flex items-center gap-3 mx-auto"
+            >
+              <PlusSquare size={24} />
+              انشر إعلانك الآن مجاناً
+            </button>
+          </div>
         </div>
 
         <form onSubmit={handleSearch} className="glass-card p-3 flex flex-col md:flex-row gap-3 shadow-[0_20px_50px_rgba(0,0,0,0.5)] border-white/10">

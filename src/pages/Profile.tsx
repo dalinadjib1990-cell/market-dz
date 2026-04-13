@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { doc, updateDoc } from 'firebase/firestore';
-import { db } from '../lib/firebase';
+import { db, auth } from '../lib/firebase';
 import { useAuth } from '../hooks/useAuth';
 import { WILAYAS } from '../constants/data';
-import { User, Mail, Phone, MapPin, Camera, Loader2, CheckCircle2 } from 'lucide-react';
+import { User, Mail, Phone, MapPin, Camera, Loader2, CheckCircle2, LogOut } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function Profile() {
@@ -119,6 +119,13 @@ export default function Profile() {
                 <span className="font-bold text-amber-500">4.8/5</span>
               </div>
             </div>
+            <button 
+              onClick={() => auth.signOut()}
+              className="w-full py-3 bg-brand-red/10 hover:bg-brand-red/20 text-brand-red rounded-xl font-bold flex items-center justify-center gap-2 transition-all mt-4"
+            >
+              <LogOut size={18} />
+              تسجيل الخروج
+            </button>
           </div>
         </div>
       </div>
