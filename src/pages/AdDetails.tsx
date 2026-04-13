@@ -63,37 +63,35 @@ export default function AdDetails() {
   };
 
   const startChat = async () => {
-    if (!user) {
+    if (!ad || !user) {
       toast.error('يرجى تسجيل الدخول للمراسلة');
       navigate('/login');
       return;
     }
-    if (user.uid === ad?.userId) {
+    if (user.uid === ad.userId) {
       toast.error('لا يمكنك مراسلة نفسك');
       return;
     }
     
     try {
-      const chatQuery = query(
-        collection(db, 'chats'),
-        where('participants', 'array-contains', user.uid),
-        where('adId', '==', id)
-      );
-      
-      const chatSnap = await getDoc(doc(db, 'chats', id + user.uid)); // Simple ID for demo
+      const chatId = id + '_' + user.uid;
+      const chatRef = doc(db, 'chats', chatId);
+      const chatSnap = await getDoc(chatRef);
       
       if (!chatSnap.exists()) {
-        await setDoc(doc(db, 'chats', id + user.uid), {
-          participants: [user.uid, ad?.userId],
+        await setDoc(chatRef, {
+          participants: [user.uid, ad.userId],
           adId: id,
-          adTitle: ad?.title,
+          adTitle: ad.title,
           updatedAt: serverTimestamp(),
+          lastMessage: '',
         });
       }
       
       navigate('/messages');
     } catch (error) {
-      toast.error('فشل بدء المحادثة');
+      console.error('Start Chat Error:', error);
+      toast.error('فشل بدء المحادثة. يرجى المحاولة لاحقاً.');
     }
   };
 
@@ -153,7 +151,7 @@ export default function AdDetails() {
                 <h1 className="text-3xl font-black tracking-tighter">{ad.title}</h1>
                 <div className="flex items-center gap-4 text-white/40 text-sm">
                   <span className="flex items-center gap-1"><MapPin size={14} /> {ad.wilaya}</span>
-                  <span className="flex items-center gap-1"><Calendar size={14} /> {new Date(ad.createdAt?.seconds * 1000).toLocaleDateString('ar-DZ')}</span>
+                  <span className="flex items-center gap-1"><Calendar size={14} /> {ad.createdAt?.toDate().toLocaleDateString('fr-FR')}</span>
                   <span className="flex items-center gap-1"><Zap size={14} /> {ad.views} مشاهدة</span>
                 </div>
               </div>

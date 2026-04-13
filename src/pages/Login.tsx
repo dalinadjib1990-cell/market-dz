@@ -94,7 +94,10 @@ export default function Login() {
           <div className="w-20 h-20 bg-brand-green rounded-[2rem] flex items-center justify-center mx-auto shadow-2xl shadow-brand-green/40 rotate-12 hover:rotate-0 transition-transform duration-500">
             <Car className="text-white" size={40} />
           </div>
-          <h2 className="text-4xl font-black tracking-tighter">
+          <h1 className="text-3xl font-black tracking-tighter">
+            MARKET<span className="text-brand-green">AUTO</span><span className="text-brand-red">DZ</span>
+          </h1>
+          <h2 className="text-2xl font-black tracking-tighter text-white/80">
             {isRegister ? 'انضم إلينا الآن' : 'مرحباً بك مجدداً'}
           </h2>
           <p className="text-white/40 font-medium">أكبر منصة لبيع وشراء السيارات في الجزائر 🇩🇿</p>
