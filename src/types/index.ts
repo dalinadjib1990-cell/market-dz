@@ -8,6 +8,7 @@ export interface UserProfile {
   photoURL?: string;
   rating?: number;
   isVerified?: boolean;
+  showPhone?: boolean;
   createdAt: any;
 }
 
@@ -16,20 +17,25 @@ export interface Ad {
   userId: string;
   sellerName: string;
   sellerPhone: string;
+  showPhone: boolean;
   title: string;
   description: string;
   price: number;
+  samouni?: number;
   isNegotiable: boolean;
   brand: string;
   model: string;
   year: number;
-  fuelType: 'بنزين' | 'بنزين + غاز' | 'ديزل' | 'كهرباء';
+  fuelType: 'بنزين' | 'ديزل' | 'غاز' | 'كهرباء';
   mileage?: number;
-  condition: 'جيدة' | 'متوسطة' | 'أقل من متوسطة';
+  engine?: string;
+  gearbox?: string;
+  condition: 'ممتازة' | 'جيدة' | 'متوسطة' | 'تحت الوسط';
   repairs: string[];
   images: string[];
   wilaya: string;
   isVerified?: boolean;
+  template?: string;
   status: 'active' | 'sold';
   createdAt: any;
   views: number;

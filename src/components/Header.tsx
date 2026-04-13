@@ -16,13 +16,16 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-50 bg-[#0a0a0a]/80 backdrop-blur-lg border-b border-white/10">
       <div className="max-w-7xl mx-auto px-4 h-20 flex items-center justify-between">
-        <Link to="/" className="flex items-center gap-2 group">
-          <div className="w-10 h-10 bg-brand-green rounded-xl flex items-center justify-center group-hover:rotate-12 transition-transform">
-            <Car className="text-white" size={24} />
+        <Link to="/" className="flex items-center gap-3 group">
+          <div className="w-12 h-12 bg-brand-green rounded-2xl flex items-center justify-center group-hover:rotate-12 transition-all duration-500 shadow-lg shadow-brand-green/20 border border-white/10">
+            <Car className="text-white" size={28} />
           </div>
-          <span className="text-xl font-black tracking-tighter">
-            MARKET<span className="text-brand-green">AUTO</span><span className="text-brand-red">DZ</span>
-          </span>
+          <div className="flex flex-col -space-y-1">
+            <span className="text-2xl font-black tracking-tighter leading-none">
+              MARKET<span className="text-brand-green">AUTO</span><span className="text-brand-red">DZ</span>
+            </span>
+            <span className="text-[8px] font-bold text-white/40 uppercase tracking-[0.2em]">الجزائر 🇩🇿 ALGERIA</span>
+          </div>
         </Link>
 
         <nav className="hidden md:flex items-center gap-8">

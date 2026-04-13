@@ -141,7 +141,13 @@ export default function AdDetails() {
           </div>
 
           {/* Ad Details */}
-          <div className="glass-card p-8 space-y-8">
+          <div className={cn(
+            "glass-card p-8 space-y-8 border-2",
+            ad.template === 'commercial' ? 'border-brand-green/20 bg-brand-green/5' :
+            ad.template === 'attractive' ? 'border-brand-red/20 bg-brand-red/5' :
+            ad.template === 'special' ? 'border-amber-500/20 bg-amber-500/5' :
+            'border-white/5 bg-white/5'
+          )}>
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div className="space-y-2">
                 <h1 className="text-3xl font-black tracking-tighter">{ad.title}</h1>
@@ -151,8 +157,11 @@ export default function AdDetails() {
                   <span className="flex items-center gap-1"><Zap size={14} /> {ad.views} مشاهدة</span>
                 </div>
               </div>
-              <div className="text-right">
+              <div className="text-right space-y-2">
                 <p className="text-4xl font-black text-brand-green">{ad.price.toLocaleString()} دج</p>
+                {ad.samouni && (
+                  <p className="text-xl font-bold text-brand-red">ساموني: {ad.samouni.toLocaleString()} دج</p>
+                )}
                 {ad.isNegotiable && <span className="text-xs bg-brand-red/10 text-brand-red px-2 py-1 rounded font-bold">قابل للتفاوض</span>}
               </div>
             </div>
@@ -172,7 +181,23 @@ export default function AdDetails() {
               </div>
               <div className="p-4 rounded-2xl bg-white/5 border border-white/5 space-y-1">
                 <p className="text-[10px] text-white/40 uppercase font-bold">المسافة</p>
-                <p className="font-bold">{ad.mileage?.toLocaleString()} كم</p>
+                <p className="font-bold">{ad.mileage?.toLocaleString() || '---'} كم</p>
+              </div>
+              <div className="p-4 rounded-2xl bg-white/5 border border-white/5 space-y-1">
+                <p className="text-[10px] text-white/40 uppercase font-bold">المحرك</p>
+                <p className="font-bold">{ad.engine || '---'}</p>
+              </div>
+              <div className="p-4 rounded-2xl bg-white/5 border border-white/5 space-y-1">
+                <p className="text-[10px] text-white/40 uppercase font-bold">علبة السرعة</p>
+                <p className="font-bold">{ad.gearbox || '---'}</p>
+              </div>
+              <div className="p-4 rounded-2xl bg-white/5 border border-white/5 space-y-1">
+                <p className="text-[10px] text-white/40 uppercase font-bold">نوع الطاقة</p>
+                <p className="font-bold">{ad.fuelType}</p>
+              </div>
+              <div className="p-4 rounded-2xl bg-white/5 border border-white/5 space-y-1">
+                <p className="text-[10px] text-white/40 uppercase font-bold">الحالة</p>
+                <p className="font-bold">{ad.condition}</p>
               </div>
             </div>
 
@@ -247,13 +272,23 @@ export default function AdDetails() {
             </div>
 
             <div className="space-y-4">
-              <button 
-                onClick={() => setShowPhone(!showPhone)}
-                className="w-full btn-primary flex items-center justify-center gap-3"
-              >
-                <Phone size={20} />
-                {showPhone ? ad.sellerPhone : 'إظهار رقم الهاتف'}
-              </button>
+              {ad.showPhone ? (
+                <button 
+                  onClick={() => setShowPhone(!showPhone)}
+                  className="w-full btn-primary flex items-center justify-center gap-3"
+                >
+                  <Phone size={20} />
+                  {showPhone ? ad.sellerPhone : 'إظهار رقم الهاتف'}
+                </button>
+              ) : (
+                <button 
+                  disabled
+                  className="w-full py-3 bg-white/5 text-white/40 rounded-xl font-bold flex items-center justify-center gap-3 cursor-not-allowed"
+                >
+                  <Phone size={20} />
+                  الرقم مخفي من قبل البائع
+                </button>
+              )}
               <button 
                 onClick={startChat}
                 className="w-full btn-secondary flex items-center justify-center gap-3"

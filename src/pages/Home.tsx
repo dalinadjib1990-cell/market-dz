@@ -21,6 +21,9 @@ export default function Home() {
 
   return (
     <div className="space-y-20 pb-20">
+      <div className="pt-8 text-center">
+        <h2 className="shiny-text text-2xl md:text-4xl">بسم الله الرحمن الرحيم</h2>
+      </div>
       <Hero />
 
       {/* Features Section */}

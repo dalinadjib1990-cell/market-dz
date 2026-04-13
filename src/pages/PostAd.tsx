@@ -4,8 +4,8 @@ import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { useAuth } from '../hooks/useAuth';
 import { uploadToCloudinary } from '../lib/cloudinary';
-import { BRANDS, WILAYAS, FUEL_TYPES, CONDITIONS, REPAIR_OPTIONS } from '../constants/data';
-import { Camera, X, Loader2, CheckCircle2, AlertCircle, PlusSquare } from 'lucide-react';
+import { BRANDS, MODELS, WILAYAS, FUEL_TYPES, CONDITIONS, REPAIR_OPTIONS, ENGINES, GEARBOXES, AD_TEMPLATES } from '../constants/data';
+import { Camera, X, Loader2, CheckCircle2, AlertCircle, PlusSquare, Info, ShieldCheck, Zap, Star } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '../lib/utils';
 
@@ -20,15 +20,24 @@ export default function PostAd() {
     title: '',
     description: '',
     price: '',
+    samouni: '',
     isNegotiable: false,
     brand: '',
+    customBrand: '',
     model: '',
+    customModel: '',
     year: new Date().getFullYear(),
     fuelType: 'بنزين',
     mileage: '',
+    engine: '',
+    customEngine: '',
+    gearbox: 'يدوي (Manuelle)',
+    customGearbox: '',
     condition: 'جيدة',
     repairs: [] as string[],
     wilaya: profile?.wilaya || 'الجزائر',
+    showPhone: true,
+    template: 'practical',
   });
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -84,14 +93,24 @@ export default function PostAd() {
 
     setLoading(true);
     try {
+      const finalBrand = formData.brand === 'Other' ? formData.customBrand : formData.brand;
+      const finalModel = formData.model === 'Other' ? formData.customModel : formData.model;
+      const finalEngine = formData.engine === 'Other' ? formData.customEngine : formData.engine;
+      const finalGearbox = formData.gearbox === 'Other' ? formData.customGearbox : formData.gearbox;
+
       await addDoc(collection(db, 'ads'), {
         ...formData,
+        brand: finalBrand,
+        model: finalModel,
+        engine: finalEngine,
+        gearbox: finalGearbox,
         userId: user.uid,
         sellerName: `${profile?.firstName} ${profile?.lastName}`,
         sellerPhone: profile?.phone || '',
         price: Number(formData.price),
+        samouni: formData.samouni ? Number(formData.samouni) : null,
         year: Number(formData.year),
-        mileage: Number(formData.mileage),
+        mileage: formData.mileage ? Number(formData.mileage) : null,
         images,
         status: 'active',
         views: 0,
@@ -121,12 +140,39 @@ export default function PostAd() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-12">
-      <div className="mb-12">
+      <div className="text-center mb-12 space-y-4">
+        <h2 className="shiny-text text-3xl md:text-5xl">بسم الله الرحمن الرحيم</h2>
         <h1 className="text-4xl font-black tracking-tighter">أضف إعلان جديد</h1>
         <p className="text-white/40">أدخل تفاصيل سيارتك بدقة لجذب المشترين</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-12">
+        {/* Template Selection */}
+        <section className="space-y-6">
+          <h3 className="text-xl font-bold flex items-center gap-2">
+            <Zap size={20} className="text-brand-green" />
+            اختر قالب الإعلان
+          </h3>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            {AD_TEMPLATES.map(template => (
+              <button
+                key={template.id}
+                type="button"
+                onClick={() => setFormData({ ...formData, template: template.id })}
+                className={cn(
+                  "p-4 rounded-2xl border-2 transition-all text-center space-y-2",
+                  formData.template === template.id 
+                    ? template.class + " bg-white/5" 
+                    : "border-white/10 opacity-50 hover:opacity-100"
+                )}
+              >
+                <div className={cn("w-3 h-3 rounded-full mx-auto", template.id === 'commercial' ? 'bg-brand-green' : template.id === 'attractive' ? 'bg-brand-red' : template.id === 'special' ? 'bg-amber-500' : 'bg-blue-500')}></div>
+                <span className="text-sm font-bold">{template.name}</span>
+              </button>
+            ))}
+          </div>
+        </section>
+
         {/* Image Upload Section */}
         <section className="space-y-6">
           <h3 className="text-xl font-bold flex items-center gap-2">
@@ -187,16 +233,28 @@ export default function PostAd() {
             </div>
             <div className="space-y-2">
               <label className="text-xs font-bold text-white/40 uppercase tracking-widest">السعر (دج)</label>
-              <div className="relative">
-                <input
-                  required
-                  type="number"
-                  placeholder="0.00"
-                  value={formData.price}
-                  onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                  className="input-field pl-12"
-                />
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 font-bold">دج</span>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="relative">
+                  <input
+                    required
+                    type="number"
+                    placeholder="السعر"
+                    value={formData.price}
+                    onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                    className="input-field pl-12"
+                  />
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 font-bold text-xs">دج</span>
+                </div>
+                <div className="relative">
+                  <input
+                    type="number"
+                    placeholder="ساموني"
+                    value={formData.samouni}
+                    onChange={(e) => setFormData({ ...formData, samouni: e.target.value })}
+                    className="input-field pl-12"
+                  />
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 font-bold text-xs">ساموني</span>
+                </div>
               </div>
               <label className="flex items-center gap-2 cursor-pointer mt-2">
                 <input
@@ -205,7 +263,7 @@ export default function PostAd() {
                   onChange={(e) => setFormData({ ...formData, isNegotiable: e.target.checked })}
                   className="w-4 h-4 accent-brand-green"
                 />
-                <span className="text-sm text-white/60">السعر قابل للتفاوض (سموني)</span>
+                <span className="text-sm text-white/60">السعر قابل للتفاوض</span>
               </label>
             </div>
           </div>
@@ -226,41 +284,69 @@ export default function PostAd() {
         {/* Technical Details */}
         <section className="glass-card p-8 space-y-8">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
+            {/* Brand */}
             <div className="space-y-2">
               <label className="text-xs font-bold text-white/40 uppercase tracking-widest">الماركة</label>
               <select
                 required
                 value={formData.brand}
-                onChange={(e) => setFormData({ ...formData, brand: e.target.value })}
+                onChange={(e) => setFormData({ ...formData, brand: e.target.value, model: '' })}
                 className="input-field appearance-none"
               >
                 <option value="">اختر الماركة</option>
                 {BRANDS.map(b => <option key={b} value={b}>{b}</option>)}
+                <option value="Other">أخرى (إدخال يدوي)</option>
               </select>
+              {formData.brand === 'Other' && (
+                <input
+                  required
+                  type="text"
+                  placeholder="ادخل الماركة يدوياً"
+                  value={formData.customBrand}
+                  onChange={(e) => setFormData({ ...formData, customBrand: e.target.value })}
+                  className="input-field mt-2"
+                />
+              )}
             </div>
+
+            {/* Model */}
             <div className="space-y-2">
               <label className="text-xs font-bold text-white/40 uppercase tracking-widest">الموديل</label>
-              <input
+              <select
                 required
-                type="text"
-                placeholder="مثال: Golf 7"
                 value={formData.model}
                 onChange={(e) => setFormData({ ...formData, model: e.target.value })}
-                className="input-field"
-              />
+                className="input-field appearance-none"
+              >
+                <option value="">اختر الموديل</option>
+                {MODELS[formData.brand]?.map(m => <option key={m} value={m}>{m}</option>)}
+                <option value="Other">أخرى (إدخال يدوي)</option>
+              </select>
+              {(formData.model === 'Other' || !MODELS[formData.brand]) && (
+                <input
+                  required
+                  type="text"
+                  placeholder="ادخل الموديل يدوياً"
+                  value={formData.customModel}
+                  onChange={(e) => setFormData({ ...formData, customModel: e.target.value })}
+                  className="input-field mt-2"
+                />
+              )}
             </div>
+
             <div className="space-y-2">
               <label className="text-xs font-bold text-white/40 uppercase tracking-widest">سنة الصنع</label>
               <input
                 required
                 type="number"
-                min="1980"
+                min="1950"
                 max={new Date().getFullYear()}
                 value={formData.year}
                 onChange={(e) => setFormData({ ...formData, year: Number(e.target.value) })}
                 className="input-field"
               />
             </div>
+
             <div className="space-y-2">
               <label className="text-xs font-bold text-white/40 uppercase tracking-widest">نوع الطاقة</label>
               <select
@@ -272,8 +358,9 @@ export default function PostAd() {
                 {FUEL_TYPES.map(f => <option key={f} value={f}>{f}</option>)}
               </select>
             </div>
+
             <div className="space-y-2">
-              <label className="text-xs font-bold text-white/40 uppercase tracking-widest">المسافة المقطوعة (كم)</label>
+              <label className="text-xs font-bold text-white/40 uppercase tracking-widest">المسافة المقطوعة (كم) - اختياري</label>
               <input
                 type="number"
                 placeholder="0"
@@ -282,6 +369,7 @@ export default function PostAd() {
                 className="input-field"
               />
             </div>
+
             <div className="space-y-2">
               <label className="text-xs font-bold text-white/40 uppercase tracking-widest">الحالة</label>
               <select
@@ -293,12 +381,57 @@ export default function PostAd() {
                 {CONDITIONS.map(c => <option key={c} value={c}>{c}</option>)}
               </select>
             </div>
+
+            {/* Engine */}
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-white/40 uppercase tracking-widest">نوع المحرك</label>
+              <select
+                value={formData.engine}
+                onChange={(e) => setFormData({ ...formData, engine: e.target.value })}
+                className="input-field appearance-none"
+              >
+                <option value="">اختر المحرك</option>
+                {ENGINES.map(e => <option key={e} value={e}>{e}</option>)}
+                <option value="Other">أخرى (إدخال يدوي)</option>
+              </select>
+              {formData.engine === 'Other' && (
+                <input
+                  type="text"
+                  placeholder="ادخل المحرك يدوياً"
+                  value={formData.customEngine}
+                  onChange={(e) => setFormData({ ...formData, customEngine: e.target.value })}
+                  className="input-field mt-2"
+                />
+              )}
+            </div>
+
+            {/* Gearbox */}
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-white/40 uppercase tracking-widest">نوع العلبة</label>
+              <select
+                value={formData.gearbox}
+                onChange={(e) => setFormData({ ...formData, gearbox: e.target.value })}
+                className="input-field appearance-none"
+              >
+                {GEARBOXES.map(g => <option key={g} value={g}>{g}</option>)}
+                <option value="Other">أخرى (إدخال يدوي)</option>
+              </select>
+              {formData.gearbox === 'Other' && (
+                <input
+                  type="text"
+                  placeholder="ادخل نوع العلبة يدوياً"
+                  value={formData.customGearbox}
+                  onChange={(e) => setFormData({ ...formData, customGearbox: e.target.value })}
+                  className="input-field mt-2"
+                />
+              )}
+            </div>
           </div>
         </section>
 
         {/* Repairs Section */}
         <section className="glass-card p-8 space-y-6">
-          <h3 className="text-xl font-bold">العوادات (Réparations)</h3>
+          <h3 className="text-xl font-bold">الأجزاء المعاودة (Réparations)</h3>
           <div className="flex flex-wrap gap-3">
             {REPAIR_OPTIONS.map(repair => (
               <button
@@ -318,18 +451,34 @@ export default function PostAd() {
           </div>
         </section>
 
-        {/* Location */}
-        <section className="glass-card p-8 space-y-4">
-          <div className="space-y-2">
-            <label className="text-xs font-bold text-white/40 uppercase tracking-widest">الولاية</label>
-            <select
-              required
-              value={formData.wilaya}
-              onChange={(e) => setFormData({ ...formData, wilaya: e.target.value })}
-              className="input-field appearance-none"
-            >
-              {WILAYAS.map(w => <option key={w} value={w}>{w}</option>)}
-            </select>
+        {/* Location & Privacy */}
+        <section className="glass-card p-8 space-y-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-white/40 uppercase tracking-widest">الولاية</label>
+              <select
+                required
+                value={formData.wilaya}
+                onChange={(e) => setFormData({ ...formData, wilaya: e.target.value })}
+                className="input-field appearance-none"
+              >
+                {WILAYAS.map(w => <option key={w} value={w}>{w}</option>)}
+              </select>
+            </div>
+            <div className="space-y-2 flex flex-col justify-center">
+              <label className="flex items-center gap-3 cursor-pointer p-4 rounded-xl bg-white/5 border border-white/10 hover:border-brand-green/50 transition-all">
+                <input
+                  type="checkbox"
+                  checked={formData.showPhone}
+                  onChange={(e) => setFormData({ ...formData, showPhone: e.target.checked })}
+                  className="w-5 h-5 accent-brand-green"
+                />
+                <div className="space-y-0.5">
+                  <span className="text-sm font-bold">إظهار رقم الهاتف</span>
+                  <p className="text-[10px] text-white/40">سيتمكن المشترون من رؤية رقمك المسجل</p>
+                </div>
+              </label>
+            </div>
           </div>
         </section>
 

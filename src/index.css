@@ -26,6 +26,20 @@
   @apply bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl;
 }
 
+.shiny-text {
+  @apply font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-brand-green via-white to-brand-red bg-[length:200%_auto] animate-shiny;
+}
+
+@keyframes shiny {
+  to {
+    background-position: 200% center;
+  }
+}
+
+@theme {
+  --animate-shiny: shiny 3s linear infinite;
+}
+
 .btn-primary {
   @apply bg-brand-green hover:bg-brand-green/90 text-white font-bold py-3 px-6 rounded-xl transition-all active:scale-95 shadow-lg shadow-brand-green/20;
 }
