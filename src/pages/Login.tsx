@@ -36,8 +36,13 @@ export default function Login() {
 
       toast.success('تم تسجيل الدخول بنجاح');
       navigate('/');
-    } catch (error) {
-      toast.error('فشل تسجيل الدخول عبر Google');
+    } catch (error: any) {
+      console.error('Google Login Error:', error);
+      if (error.code === 'auth/unauthorized-domain') {
+        toast.error('هذا النطاق (Domain) غير مصرح به في Firebase. يرجى إضافته في إعدادات Firebase Console.');
+      } else {
+        toast.error(`فشل تسجيل الدخول: ${error.message || 'خطأ غير معروف'}`);
+      }
     }
   };
 
