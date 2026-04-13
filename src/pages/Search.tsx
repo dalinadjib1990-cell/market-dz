@@ -17,6 +17,11 @@ export default function Search() {
   const qParam = searchParams.get('q') || '';
   const brandParam = searchParams.get('brand') || '';
   const wilayaParam = searchParams.get('wilaya') || '';
+  const minPrice = searchParams.get('minPrice') || '';
+  const maxPrice = searchParams.get('maxPrice') || '';
+  const fuelType = searchParams.get('fuelType') || '';
+  const minYear = searchParams.get('minYear') || '';
+  const maxYear = searchParams.get('maxYear') || '';
 
   useEffect(() => {
     let baseQuery = query(collection(db, 'ads'), orderBy('createdAt', 'desc'));
@@ -27,10 +32,14 @@ export default function Search() {
     if (wilayaParam) {
       baseQuery = query(baseQuery, where('wilaya', '==', wilayaParam));
     }
+    if (fuelType) {
+      baseQuery = query(baseQuery, where('fuelType', '==', fuelType));
+    }
 
     const unsubscribe = onSnapshot(baseQuery, (snap) => {
       let results = snap.docs.map(d => ({ id: d.id, ...d.data() } as Ad));
       
+      // Client-side filtering for ranges and text search
       if (qParam) {
         const lowQ = qParam.toLowerCase();
         results = results.filter(ad => 
@@ -40,12 +49,17 @@ export default function Search() {
         );
       }
 
+      if (minPrice) results = results.filter(ad => ad.price >= Number(minPrice));
+      if (maxPrice) results = results.filter(ad => ad.price <= Number(maxPrice));
+      if (minYear) results = results.filter(ad => ad.year >= Number(minYear));
+      if (maxYear) results = results.filter(ad => ad.year <= Number(maxYear));
+
       setAds(results);
       setLoading(false);
     });
 
     return () => unsubscribe();
-  }, [qParam, brandParam, wilayaParam]);
+  }, [qParam, brandParam, wilayaParam, minPrice, maxPrice, fuelType, minYear, maxYear]);
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-12 space-y-8">
@@ -107,22 +121,77 @@ export default function Search() {
 
             <div className="space-y-4">
               <h4 className="font-bold text-sm uppercase tracking-widest text-white/40">نوع الطاقة</h4>
-              <div className="space-y-2">
-                {FUEL_TYPES.map(f => (
-                  <label key={f} className="flex items-center gap-3 cursor-pointer group">
-                    <input type="checkbox" className="w-4 h-4 accent-brand-green" />
-                    <span className="text-sm text-white/60 group-hover:text-white transition-colors">{f}</span>
-                  </label>
-                ))}
-              </div>
+              <select 
+                value={fuelType}
+                onChange={(e) => {
+                  searchParams.set('fuelType', e.target.value);
+                  setSearchParams(searchParams);
+                }}
+                className="input-field appearance-none"
+              >
+                <option value="">كل الأنواع</option>
+                {FUEL_TYPES.map(f => <option key={f} value={f}>{f}</option>)}
+              </select>
             </div>
 
             <div className="space-y-4">
               <h4 className="font-bold text-sm uppercase tracking-widest text-white/40">السعر (دج)</h4>
               <div className="grid grid-cols-2 gap-2">
-                <input type="number" placeholder="من" className="input-field !py-2 text-sm" />
-                <input type="number" placeholder="إلى" className="input-field !py-2 text-sm" />
+                <input 
+                  type="number" 
+                  placeholder="من" 
+                  value={minPrice}
+                  onChange={(e) => {
+                    searchParams.set('minPrice', e.target.value);
+                    setSearchParams(searchParams);
+                  }}
+                  className="input-field !py-2 text-sm" 
+                />
+                <input 
+                  type="number" 
+                  placeholder="إلى" 
+                  value={maxPrice}
+                  onChange={(e) => {
+                    searchParams.set('maxPrice', e.target.value);
+                    setSearchParams(searchParams);
+                  }}
+                  className="input-field !py-2 text-sm" 
+                />
               </div>
+            </div>
+
+            <div className="space-y-4">
+              <h4 className="font-bold text-sm uppercase tracking-widest text-white/40">السنة</h4>
+              <div className="grid grid-cols-2 gap-2">
+                <input 
+                  type="number" 
+                  placeholder="من" 
+                  value={minYear}
+                  onChange={(e) => {
+                    searchParams.set('minYear', e.target.value);
+                    setSearchParams(searchParams);
+                  }}
+                  className="input-field !py-2 text-sm" 
+                />
+                <input 
+                  type="number" 
+                  placeholder="إلى" 
+                  value={maxYear}
+                  onChange={(e) => {
+                    searchParams.set('maxYear', e.target.value);
+                    setSearchParams(searchParams);
+                  }}
+                  className="input-field !py-2 text-sm" 
+                />
+              </div>
+            </div>
+            <div className="space-y-4 pt-4">
+              <button 
+                onClick={() => setSearchParams({})}
+                className="w-full py-3 bg-white/5 hover:bg-white/10 text-white/40 rounded-xl font-bold text-sm transition-all"
+              >
+                إعادة ضبط الفلاتر
+              </button>
             </div>
           </div>
 

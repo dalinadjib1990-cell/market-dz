@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth, googleProvider, db } from '../lib/firebase';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
-import { Car, Mail, Lock, Chrome, ArrowLeft, User, Phone, MapPin } from 'lucide-react';
+import { Car, Mail, Lock, Chrome, ArrowLeft, User, Phone, MapPin, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { WILAYAS } from '../constants/data';
 
@@ -197,8 +197,15 @@ export default function Login() {
               </div>
             </div>
 
-            <button disabled={loading} type="submit" className="w-full btn-primary !py-4 text-lg">
-              {loading ? 'جاري التحميل...' : (isRegister ? 'إنشاء حساب جديد' : 'تسجيل الدخول')}
+            <button disabled={loading} type="submit" className="w-full btn-primary !py-4 text-lg flex items-center justify-center gap-3">
+              {loading ? (
+                <>
+                  <Loader2 className="animate-spin" size={24} />
+                  <span>جاري التحميل...</span>
+                </>
+              ) : (
+                <span>{isRegister ? 'إنشاء حساب جديد' : 'تسجيل الدخول'}</span>
+              )}
             </button>
           </form>
 

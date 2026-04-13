@@ -14,6 +14,7 @@ export default function PostAd() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [images, setImages] = useState<string[]>([]);
 
   const [formData, setFormData] = useState({
@@ -53,11 +54,14 @@ export default function PostAd() {
     }
 
     setUploading(true);
+    setUploadProgress(0);
     const newImages: string[] = [];
 
     for (let i = 0; i < files.length; i++) {
       try {
-        const url = await uploadToCloudinary(files[i]);
+        const url = await uploadToCloudinary(files[i], (p) => {
+          setUploadProgress(Math.round(((i + p / 100) / files.length) * 100));
+        });
         newImages.push(url);
       } catch (error) {
         toast.error(`فشل رفع الصورة ${i + 1}`);
@@ -66,6 +70,7 @@ export default function PostAd() {
 
     setImages([...images, ...newImages]);
     setUploading(false);
+    setUploadProgress(0);
   };
 
   const removeImage = (index: number) => {
@@ -200,9 +205,18 @@ export default function PostAd() {
             ))}
             
             {images.length < 10 && (
-              <label className="aspect-square rounded-2xl border-2 border-dashed border-white/10 hover:border-brand-green/50 hover:bg-white/5 transition-all cursor-pointer flex flex-col items-center justify-center gap-2">
+              <label className="relative aspect-square rounded-2xl border-2 border-dashed border-white/10 hover:border-brand-green/50 hover:bg-white/5 transition-all cursor-pointer flex flex-col items-center justify-center gap-2 overflow-hidden">
                 {uploading ? (
-                  <Loader2 className="animate-spin text-brand-green" size={32} />
+                  <div className="absolute inset-0 bg-black/40 backdrop-blur-sm flex flex-col items-center justify-center space-y-2 p-4">
+                    <Loader2 className="animate-spin text-brand-green" size={24} />
+                    <span className="text-[10px] font-bold text-white">{uploadProgress}%</span>
+                    <div className="w-full h-1 bg-white/10 rounded-full overflow-hidden">
+                      <div 
+                        className="h-full bg-brand-green transition-all duration-300" 
+                        style={{ width: `${uploadProgress}%` }}
+                      ></div>
+                    </div>
+                  </div>
                 ) : (
                   <>
                     <PlusSquare size={32} className="text-white/20" />

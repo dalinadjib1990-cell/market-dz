@@ -19,8 +19,8 @@ export default function MobileNav() {
   ];
 
   return (
-    <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#0a0a0a]/90 backdrop-blur-lg border-t border-white/10 px-4 py-2">
-      <div className="flex items-center justify-between max-w-lg mx-auto">
+    <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#0a0a0a]/90 backdrop-blur-lg border-t border-white/10 px-2 py-2">
+      <div className="flex items-center justify-around max-w-lg mx-auto">
         {navItems.map((item) => {
           const isActive = location.pathname === item.path;
           return (
@@ -28,8 +28,8 @@ export default function MobileNav() {
               key={item.path}
               to={item.path}
               className={cn(
-                "flex flex-col items-center gap-1 transition-all",
-                item.primary ? "relative -top-6" : "p-2",
+                "flex flex-col items-center gap-1 transition-all min-w-[64px]",
+                item.primary ? "relative -top-6" : "p-1",
                 isActive ? "text-brand-green" : "text-white/40"
               )}
             >
@@ -37,9 +37,9 @@ export default function MobileNav() {
                 "transition-all",
                 item.primary ? "w-14 h-14 bg-brand-green rounded-2xl flex items-center justify-center text-white shadow-lg shadow-brand-green/40 scale-110" : "w-6 h-6"
               )}>
-                <item.icon size={item.primary ? 28 : 24} />
+                <item.icon size={item.primary ? 28 : 20} />
               </div>
-              {!item.primary && <span className="text-[10px] font-bold">{item.label}</span>}
+              {!item.primary && <span className="text-[9px] font-bold whitespace-nowrap">{item.label}</span>}
             </Link>
           );
         })}
