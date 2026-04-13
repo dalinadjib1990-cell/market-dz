@@ -34,6 +34,9 @@ export default function PostAd() {
     gearbox: 'يدوي (Manuelle)',
     customGearbox: '',
     condition: 'جيدة',
+    salonCondition: 'جيدة',
+    suspensionRating: 10,
+    tiresRating: 10,
     repairs: [] as string[],
     wilaya: profile?.wilaya || 'الجزائر',
     showPhone: true,
@@ -104,6 +107,8 @@ export default function PostAd() {
         model: finalModel,
         engine: finalEngine,
         gearbox: finalGearbox,
+        suspensionRating: Number(formData.suspensionRating),
+        tiresRating: Number(formData.tiresRating),
         userId: user.uid,
         sellerName: `${profile?.firstName} ${profile?.lastName}`,
         sellerPhone: profile?.phone || '',
@@ -269,9 +274,8 @@ export default function PostAd() {
           </div>
 
           <div className="space-y-2">
-            <label className="text-xs font-bold text-white/40 uppercase tracking-widest">وصف السيارة</label>
+            <label className="text-xs font-bold text-white/40 uppercase tracking-widest">وصف السيارة (اختياري)</label>
             <textarea
-              required
               rows={4}
               placeholder="اكتب تفاصيل السيارة، المحرك، الحالة..."
               value={formData.description}
@@ -286,9 +290,8 @@ export default function PostAd() {
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
             {/* Brand */}
             <div className="space-y-2">
-              <label className="text-xs font-bold text-white/40 uppercase tracking-widest">الماركة</label>
+              <label className="text-xs font-bold text-white/40 uppercase tracking-widest">الماركة (اختياري)</label>
               <select
-                required
                 value={formData.brand}
                 onChange={(e) => setFormData({ ...formData, brand: e.target.value, model: '' })}
                 className="input-field appearance-none"
@@ -299,7 +302,6 @@ export default function PostAd() {
               </select>
               {formData.brand === 'Other' && (
                 <input
-                  required
                   type="text"
                   placeholder="ادخل الماركة يدوياً"
                   value={formData.customBrand}
@@ -335,9 +337,8 @@ export default function PostAd() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-xs font-bold text-white/40 uppercase tracking-widest">سنة الصنع</label>
+              <label className="text-xs font-bold text-white/40 uppercase tracking-widest">سنة الصنع (اختياري)</label>
               <select
-                required
                 value={formData.year}
                 onChange={(e) => setFormData({ ...formData, year: Number(e.target.value) })}
                 className="input-field appearance-none"
@@ -348,9 +349,8 @@ export default function PostAd() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-xs font-bold text-white/40 uppercase tracking-widest">نوع الطاقة</label>
+              <label className="text-xs font-bold text-white/40 uppercase tracking-widest">نوع الطاقة (اختياري)</label>
               <select
-                required
                 value={formData.fuelType}
                 onChange={(e) => setFormData({ ...formData, fuelType: e.target.value as any })}
                 className="input-field appearance-none"
@@ -371,15 +371,51 @@ export default function PostAd() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-xs font-bold text-white/40 uppercase tracking-widest">الحالة</label>
+              <label className="text-xs font-bold text-white/40 uppercase tracking-widest">الحالة العامة (اختياري)</label>
               <select
-                required
                 value={formData.condition}
                 onChange={(e) => setFormData({ ...formData, condition: e.target.value as any })}
                 className="input-field appearance-none"
               >
                 {CONDITIONS.map(c => <option key={c} value={c}>{c}</option>)}
               </select>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-white/40 uppercase tracking-widest">حالة الصالون (اختياري)</label>
+              <select
+                value={formData.salonCondition}
+                onChange={(e) => setFormData({ ...formData, salonCondition: e.target.value as any })}
+                className="input-field appearance-none"
+              >
+                <option value="جيدة">جيدة</option>
+                <option value="متوسطة">متوسطة</option>
+                <option value="تحت الوسط">تحت الوسط</option>
+              </select>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-white/40 uppercase tracking-widest">حالة جهاز التعليق ({formData.suspensionRating}/10)</label>
+              <input
+                type="range"
+                min="1"
+                max="10"
+                value={formData.suspensionRating}
+                onChange={(e) => setFormData({ ...formData, suspensionRating: Number(e.target.value) })}
+                className="w-full accent-brand-green mt-2"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-white/40 uppercase tracking-widest">حالة العجلات ({formData.tiresRating}/10)</label>
+              <input
+                type="range"
+                min="1"
+                max="10"
+                value={formData.tiresRating}
+                onChange={(e) => setFormData({ ...formData, tiresRating: Number(e.target.value) })}
+                className="w-full accent-brand-green mt-2"
+              />
             </div>
 
             {/* Engine */}

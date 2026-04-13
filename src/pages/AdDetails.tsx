@@ -199,6 +199,24 @@ export default function AdDetails() {
                 <p className="text-[10px] text-white/40 uppercase font-bold">الحالة</p>
                 <p className="font-bold">{ad.condition}</p>
               </div>
+              {ad.salonCondition && (
+                <div className="p-4 rounded-2xl bg-white/5 border border-white/5 space-y-1">
+                  <p className="text-[10px] text-white/40 uppercase font-bold">حالة الصالون</p>
+                  <p className="font-bold">{ad.salonCondition}</p>
+                </div>
+              )}
+              {ad.suspensionRating && (
+                <div className="p-4 rounded-2xl bg-white/5 border border-white/5 space-y-1">
+                  <p className="text-[10px] text-white/40 uppercase font-bold">حالة التعليق</p>
+                  <p className="font-bold">{ad.suspensionRating}/10</p>
+                </div>
+              )}
+              {ad.tiresRating && (
+                <div className="p-4 rounded-2xl bg-white/5 border border-white/5 space-y-1">
+                  <p className="text-[10px] text-white/40 uppercase font-bold">حالة العجلات</p>
+                  <p className="font-bold">{ad.tiresRating}/10</p>
+                </div>
+              )}
             </div>
 
             <div className="space-y-4">

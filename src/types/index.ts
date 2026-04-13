@@ -31,6 +31,9 @@ export interface Ad {
   engine?: string;
   gearbox?: string;
   condition: 'ممتازة' | 'جيدة' | 'متوسطة' | 'تحت الوسط';
+  salonCondition?: 'جيدة' | 'متوسطة' | 'تحت الوسط';
+  suspensionRating?: number;
+  tiresRating?: number;
   repairs: string[];
   images: string[];
   wilaya: string;

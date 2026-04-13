@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { doc, updateDoc } from 'firebase/firestore';
 import { db, auth } from '../lib/firebase';
 import { useAuth } from '../hooks/useAuth';
@@ -8,13 +9,35 @@ import { toast } from 'sonner';
 
 export default function Profile() {
   const { user, profile } = useAuth();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    firstName: profile?.firstName || '',
-    lastName: profile?.lastName || '',
-    wilaya: profile?.wilaya || 'الجزائر',
-    phone: profile?.phone || '',
+    firstName: '',
+    lastName: '',
+    wilaya: 'الجزائر',
+    phone: '',
   });
+
+  React.useEffect(() => {
+    if (profile) {
+      setFormData({
+        firstName: profile.firstName || '',
+        lastName: profile.lastName || '',
+        wilaya: profile.wilaya || 'الجزائر',
+        phone: profile.phone || '',
+      });
+    }
+  }, [profile]);
+
+  const handleLogout = async () => {
+    try {
+      await auth.signOut();
+      navigate('/');
+      toast.success('تم تسجيل الخروج بنجاح');
+    } catch (error) {
+      toast.error('فشل تسجيل الخروج');
+    }
+  };
 
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -120,7 +143,7 @@ export default function Profile() {
               </div>
             </div>
             <button 
-              onClick={() => auth.signOut()}
+              onClick={handleLogout}
               className="w-full py-3 bg-brand-red/10 hover:bg-brand-red/20 text-brand-red rounded-xl font-bold flex items-center justify-center gap-2 transition-all mt-4"
             >
               <LogOut size={18} />
