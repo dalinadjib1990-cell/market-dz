@@ -1,0 +1,94 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isAdmin() {
+      return isAuthenticated() && (
+        request.auth.token.email == "dalinadjib1990@gmail.com" ||
+        (request.auth.token.email_verified == true && 
+         exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin')
+      );
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // ===============================================================
+    // GLOBAL ADMIN ACCESS (Must be first)
+    // ===============================================================
+    match /{document=**} {
+      allow read, write: if isAdmin();
+    }
+
+    // ===============================================================
+    // CITIZEN & PUBLIC RULES
+    // ===============================================================
+
+    match /test/connection {
+      allow read: if true;
+    }
+
+    match /users/{userId} {
+      allow get: if isOwner(userId) || isAdmin();
+      allow list: if isAdmin();
+      allow create: if isAuthenticated();
+      allow update: if isOwner(userId) || isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    match /nins/{nin} {
+      allow read, create: if isAuthenticated();
+      allow delete: if isAdmin();
+    }
+
+    match /phones/{phone} {
+      allow read, create: if isAuthenticated();
+      allow delete: if isAdmin();
+    }
+
+    match /sheep/{sheepId} {
+      allow read: if isAuthenticated();
+      allow create, delete, update: if isAdmin() || (
+        isAuthenticated() && 
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status']) &&
+        request.resource.data.status == 'reserved'
+      );
+    }
+
+    match /orders/{orderId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isAdmin();
+    }
+
+    match /appointments/{appointmentId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    match /auditLogs/{logId} {
+      allow read: if isAdmin();
+      allow create: if isAuthenticated();
+    }
+
+    match /fraudAlerts/{alertId} {
+      allow read: if isAdmin();
+      allow create: if isAuthenticated();
+    }
+    
+    match /sales/{saleId} {
+      allow read: if isAdmin();
+      allow create: if isAdmin();
+    }
+  }
+}

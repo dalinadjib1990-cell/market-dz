@@ -1,0 +1,111 @@
+{
+  "entities": {
+    "user": {
+      "title": "User",
+      "description": "A citizen or administrator in the system.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "Firebase Auth UID" },
+        "email": { "type": "string", "format": "email" },
+        "fullName": { "type": "string" },
+        "nin": { "type": "string", "description": "National Identification Number" },
+        "familyMembersCount": { "type": "number", "description": "Number of family members" },
+        "phone": { "type": "string" },
+        "wilaya": { "type": "string" },
+        "daira": { "type": "string" },
+        "commune": { "type": "string" },
+        "employmentStatus": { "type": "string", "enum": ["unemployed", "employee", "freelancer"] },
+        "role": { "type": "string", "enum": ["citizen", "admin"] },
+        "status": { "type": "string", "enum": ["active", "blocked"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "email", "fullName", "nin", "role", "employmentStatus", "familyMembersCount"]
+    },
+    "sheep": {
+      "title": "Sheep",
+      "description": "Livestock available for distribution.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "tagNumber": { "type": "string", "description": "Physical tag ID" },
+        "weight": { "type": "number" },
+        "breed": { "type": "string" },
+        "price": { "type": "number" },
+        "location": { "type": "string", "description": "Pickup location for this sheep" },
+        "status": { "type": "string", "enum": ["available", "reserved", "assigned", "sold", "dead", "replaced"] },
+        "region": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "tagNumber", "status"]
+    },
+    "order": {
+      "title": "Order",
+      "description": "A sheep reservation/purchase by a family.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "familyHeadNIN": { "type": "string" },
+        "sheepId": { "type": "string" },
+        "appointmentId": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "confirmed", "completed", "cancelled"] },
+        "qrCodeData": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "completedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "userId", "familyHeadNIN", "sheepId", "status"]
+    },
+    "appointment": {
+      "title": "Appointment",
+      "description": "Scheduled pickup time slot.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "date": { "type": "string", "format": "date" },
+        "timeSlot": { "type": "string" },
+        "location": { "type": "string" },
+        "capacity": { "type": "number" },
+        "currentBookings": { "type": "number" }
+      },
+      "required": ["id", "date", "timeSlot", "location"]
+    },
+    "auditLog": {
+      "title": "Audit Log",
+      "description": "Record of administrative actions.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "adminId": { "type": "string" },
+        "action": { "type": "string" },
+        "targetId": { "type": "string" },
+        "before": { "type": "object" },
+        "after": { "type": "object" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "adminId", "action", "timestamp"]
+    },
+    "fraudAlert": {
+      "title": "Fraud Alert",
+      "description": "Detected suspicious activity.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "type": { "type": "string" },
+        "details": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "type", "timestamp"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": { "schema": "user", "description": "User profiles" },
+    "/sheep/{sheepId}": { "schema": "sheep", "description": "Inventory of sheep" },
+    "/orders/{orderId}": { "schema": "order", "description": "Family orders" },
+    "/appointments/{appointmentId}": { "schema": "appointment", "description": "Pickup slots" },
+    "/auditLogs/{logId}": { "schema": "auditLog", "description": "Admin action history" },
+    "/fraudAlerts/{alertId}": { "schema": "fraudAlert", "description": "Suspicious activity logs" },
+    "/nins/{nin}": { "schema": { "type": "object", "properties": { "uid": { "type": "string" }, "createdAt": { "type": "string" } } }, "description": "Unique NIN tracking" },
+    "/phones/{phone}": { "schema": { "type": "object", "properties": { "uid": { "type": "string" }, "createdAt": { "type": "string" } } }, "description": "Unique Phone tracking" }
+  }
+}
