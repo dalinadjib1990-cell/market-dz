@@ -92,7 +92,7 @@ export default function App() {
             </div>
           </div>
           <div className="max-w-7xl mx-auto px-4 mt-12 pt-8 border-t border-white/5 text-center text-xs text-white/20">
-            © 2026 Market Auto DZ. جميع الحقوق محفوظة. صنع بكل فخر في الجزائر 🇩🇿
+            © 2026 Market Auto DZ. جميع الحقوق محفوظة. v1.0.5 | صنع بكل فخر في الجزائر 🇩🇿
           </div>
         </footer>
         <Toaster position="top-center" richColors />

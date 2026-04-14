@@ -21,8 +21,14 @@ export default function Home() {
 
   return (
     <div className="space-y-20 pb-20">
-      <div className="pt-8 text-center">
+      <div className="pt-8 text-center space-y-2">
         <h2 className="shiny-text text-2xl md:text-4xl">بسم الله الرحمن الرحيم</h2>
+        <div className="relative inline-block">
+          <h3 className="text-lg md:text-xl font-bold text-brand-green/60 italic">
+            اللهم صلي و سلم على سيدنا محمد
+          </h3>
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -skew-x-12 translate-x-[-100%] animate-shimmer"></div>
+        </div>
       </div>
       <Hero />
 

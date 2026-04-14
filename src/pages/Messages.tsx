@@ -288,8 +288,8 @@ export default function Messages() {
   if (!user) return null;
 
   return (
-    <div className="max-w-7xl mx-auto px-4 h-[calc(100dvh-140px)] md:h-[calc(100vh-80px)] py-4 md:py-8">
-      <div className="glass-card h-full flex overflow-hidden relative">
+    <div className="max-w-7xl mx-auto px-0 md:px-4 h-[calc(100dvh-160px)] md:h-[calc(100vh-80px)] py-0 md:py-8">
+      <div className="glass-card h-full flex overflow-hidden relative rounded-none md:rounded-2xl border-x-0 md:border-x">
         {/* Sidebar */}
         <div className={cn(
           "w-full md:w-80 border-l border-white/10 flex flex-col transition-all duration-300",
@@ -550,10 +550,10 @@ export default function Messages() {
                 <div ref={messagesEndRef} />
               </div>
 
-              <form onSubmit={handleSendMessage} className="p-4 md:p-6 border-t border-white/10 flex gap-4 bg-[#0a0a0a]/50 backdrop-blur-md">
-                <div className="flex items-center gap-2">
-                  <label className="p-3 bg-white/5 hover:bg-white/10 rounded-2xl cursor-pointer transition-all text-white/40 hover:text-white">
-                    {uploading ? <Loader2 className="animate-spin" size={20} /> : <ImageIcon size={20} />}
+              <form onSubmit={handleSendMessage} className="p-4 md:p-6 border-t border-white/10 flex gap-2 md:gap-4 bg-[#0a0a0a]/80 backdrop-blur-xl sticky bottom-0">
+                <div className="flex items-center">
+                  <label className="p-2 md:p-3 bg-white/5 hover:bg-white/10 rounded-xl md:rounded-2xl cursor-pointer transition-all text-white/40 hover:text-white">
+                    {uploading ? <Loader2 className="animate-spin" size={18} /> : <ImageIcon size={18} />}
                     <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} disabled={uploading} />
                   </label>
                 </div>
@@ -563,11 +563,11 @@ export default function Messages() {
                     placeholder="اكتب رسالتك..."
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}
-                    className="w-full bg-white/5 border border-white/10 rounded-2xl py-3 px-6 text-sm outline-none focus:border-brand-green/50 focus:bg-white/10 transition-all"
+                    className="w-full bg-white/5 border border-white/10 rounded-xl md:rounded-2xl py-2 md:py-3 px-4 md:px-6 text-sm outline-none focus:border-brand-green/50 focus:bg-white/10 transition-all"
                   />
                 </div>
-                <button type="submit" className="bg-brand-green text-white p-3 rounded-2xl hover:scale-105 active:scale-95 transition-all shadow-lg shadow-brand-green/20">
-                  <Send size={20} />
+                <button type="submit" className="bg-brand-green text-white p-2 md:p-3 rounded-xl md:rounded-2xl hover:scale-105 active:scale-95 transition-all shadow-lg shadow-brand-green/20">
+                  <Send size={18} />
                 </button>
               </form>
             </div>
