@@ -19,6 +19,7 @@ export default function Login() {
   const navigate = useNavigate();
 
   const handleGoogleLogin = async () => {
+    setLoading(true);
     try {
       const result = await signInWithPopup(auth, googleProvider);
       const user = result.user;
@@ -40,9 +41,15 @@ export default function Login() {
       console.error('Google Login Error:', error);
       if (error.code === 'auth/unauthorized-domain') {
         toast.error('هذا النطاق (Domain) غير مصرح به في Firebase. يرجى إضافته في إعدادات Firebase Console.');
+      } else if (error.code === 'auth/network-request-failed') {
+        toast.error('فشل الاتصال بالشبكة. يرجى التأكد من إيقاف مانع الإعلانات (Ad-blocker) وتفعيل ملفات تعريف الارتباط (Cookies).');
+      } else if (error.code === 'auth/popup-blocked') {
+        toast.error('تم حظر النافذة المنبثقة. يرجى السماح بالمنبثقات لهذا الموقع.');
       } else {
         toast.error(`فشل تسجيل الدخول: ${error.message || 'خطأ غير معروف'}`);
       }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -225,6 +232,15 @@ export default function Login() {
             <Chrome size={20} />
             Google تسجيل الدخول عبر
           </button>
+
+          <div className="p-4 rounded-xl bg-white/5 border border-white/5 space-y-2">
+            <p className="text-[10px] text-white/40 font-bold text-center">
+              تواجه مشكلة في تسجيل الدخول بجوجل؟
+            </p>
+            <p className="text-[9px] text-white/20 text-center leading-relaxed">
+              يرجى التأكد من إيقاف مانع الإعلانات (Ad-blocker) والسماح بملفات تعريف الارتباط (Cookies) في متصفحك.
+            </p>
+          </div>
 
           <p className="text-center text-sm text-white/40">
             {isRegister ? 'لديك حساب بالفعل؟' : 'ليس لديك حساب؟'}

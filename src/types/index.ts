@@ -65,6 +65,12 @@ export interface Chat {
   id: string;
   participants: string[];
   adId: string;
+  adTitle?: string;
+  buyerId?: string;
+  sellerId?: string;
+  buyerName?: string;
+  sellerName?: string;
   lastMessage?: string;
+  lastSenderId?: string;
   updatedAt: any;
 }

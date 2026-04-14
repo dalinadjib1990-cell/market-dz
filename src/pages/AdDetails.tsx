@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { doc, getDoc, collection, addDoc, setDoc, serverTimestamp, query, where, onSnapshot } from 'firebase/firestore';
+import { doc, getDoc, getDocs, collection, addDoc, setDoc, serverTimestamp, query, where, onSnapshot } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { useAuth } from '../hooks/useAuth';
 import { Ad, Comment } from '../types';
@@ -74,24 +74,51 @@ export default function AdDetails() {
     }
     
     try {
-      const chatId = id + '_' + user.uid;
-      const chatRef = doc(db, 'chats', chatId);
-      const chatSnap = await getDoc(chatRef);
+      // Use query to check for existing chat instead of getDoc with hardcoded ID
+      const chatQuery = query(
+        collection(db, 'chats'),
+        where('participants', 'array-contains', user.uid),
+        where('adId', '==', id)
+      );
       
-      if (!chatSnap.exists()) {
-        await setDoc(chatRef, {
+      const chatSnap = await getDocs(chatQuery);
+      let chatId = '';
+      
+      if (chatSnap.empty) {
+        // Create new chat with a random ID
+        const newChatRef = await addDoc(collection(db, 'chats'), {
           participants: [user.uid, ad.userId],
           adId: id,
           adTitle: ad.title,
+          buyerId: user.uid,
+          sellerId: ad.userId,
+          buyerName: `${profile?.firstName} ${profile?.lastName}`,
+          sellerName: ad.sellerName,
           updatedAt: serverTimestamp(),
-          lastMessage: '',
+          lastMessage: 'هل السيارة لا تزال متوفرة؟',
+          lastSenderId: user.uid,
         });
+        chatId = newChatRef.id;
+
+        // Send the actual message document
+        await addDoc(collection(db, 'messages'), {
+          chatId: chatId,
+          senderId: user.uid,
+          text: 'هل السيارة لا تزال متوفرة؟',
+          createdAt: serverTimestamp(),
+        });
+      } else {
+        chatId = chatSnap.docs[0].id;
       }
       
       navigate('/messages');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Start Chat Error:', error);
-      toast.error('فشل بدء المحادثة. يرجى المحاولة لاحقاً.');
+      if (error.message?.includes('Missing or insufficient permissions')) {
+        toast.error('خطأ في الصلاحيات. يرجى التأكد من تسجيل الدخول.');
+      } else {
+        toast.error('فشل بدء المحادثة. يرجى المحاولة لاحقاً.');
+      }
     }
   };
 
