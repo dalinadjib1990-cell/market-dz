@@ -56,15 +56,14 @@ export default function AgreementModal() {
             <div className="space-y-3 md:space-y-4">
               <h2 className="text-xl md:text-3xl font-black tracking-tighter">تعهد بالأمانة والمصداقية</h2>
               <div className="p-4 md:p-6 bg-white/5 rounded-2xl border border-white/10 space-y-3 md:space-y-4 text-right">
-                <div className="space-y-1">
-                  <p className="text-base md:text-lg font-bold text-brand-green flex items-center justify-end gap-2">
+                <div className="space-y-3">
+                  <p className="text-lg md:text-xl font-bold text-brand-green flex items-center justify-end gap-2">
                     بسم الله الرحمن الرحيم
                   </p>
-                  <div className="relative overflow-hidden inline-block w-full">
-                    <p className="text-xs md:text-base font-bold text-brand-green/60 italic text-right">
+                  <div className="flex justify-end">
+                    <p className="shiny-text text-base md:text-2xl italic text-right">
                       اللهم صلي و سلم على سيدنا محمد
                     </p>
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -skew-x-12 translate-x-[-100%] animate-shimmer"></div>
                   </div>
                 </div>
                 <p className="text-white/80 leading-relaxed font-medium text-xs md:text-base">

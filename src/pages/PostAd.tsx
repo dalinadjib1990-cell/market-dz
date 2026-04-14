@@ -159,15 +159,14 @@ export default function PostAd() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-12">
-      <div className="text-center mb-12 space-y-4">
-        <h2 className="shiny-text text-3xl md:text-5xl">بسم الله الرحمن الرحيم</h2>
-        <div className="relative inline-block">
-          <h3 className="text-xl md:text-2xl font-bold text-brand-green/80 italic">
+      <div className="text-center mb-12 space-y-6">
+        <h2 className="shiny-text text-3xl md:text-6xl">بسم الله الرحمن الرحيم</h2>
+        <div className="flex justify-center">
+          <h3 className="shiny-text text-2xl md:text-4xl italic">
             اللهم صلي و سلم على سيدنا محمد
           </h3>
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -skew-x-12 translate-x-[-100%] animate-shimmer"></div>
         </div>
-        <h1 className="text-4xl font-black tracking-tighter mt-4">أضف إعلان جديد</h1>
+        <h1 className="text-4xl font-black tracking-tighter mt-8">أضف إعلان جديد</h1>
         <p className="text-white/40">أدخل تفاصيل سيارتك بدقة لجذب المشترين</p>
       </div>
 
