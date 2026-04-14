@@ -68,47 +68,67 @@ export default function AdDetails() {
       navigate('/login');
       return;
     }
-    if (user.uid === ad.userId) {
-      toast.error('لا يمكنك مراسلة نفسك');
+    if (!ad || !ad.userId) {
+      console.log('Ad data missing or userId missing:', ad);
+      toast.error('بيانات البائع غير مكتملة');
       return;
     }
+    console.log('Starting chat. Current User:', user.uid, 'Ad Owner:', ad.userId);
+    // Allow self-messaging for testing as requested by user
     
     try {
-      // Use query to check for existing chat instead of getDoc with hardcoded ID
+      // Fetch all chats for the user
       const chatQuery = query(
         collection(db, 'chats'),
-        where('participants', 'array-contains', user.uid),
-        where('adId', '==', id)
+        where('participants', 'array-contains', user.uid)
       );
       
       const chatSnap = await getDocs(chatQuery);
+      
+      // Find chat for this specific ad and specific seller
+      const existingChat = chatSnap.docs.find(doc => {
+        const data = doc.data();
+        return data.adId === id && data.participants?.includes(ad.userId);
+      });
+      
       let chatId = '';
       
-      if (chatSnap.empty) {
-        // Create new chat with a random ID
+      if (!existingChat) {
+        // Generate clean names
+        const getCleanName = (p: any, u: any, fallback: string) => {
+          if (p && (p.firstName || p.lastName)) {
+            return `${p.firstName || ''} ${p.lastName || ''}`.trim();
+          }
+          return u.displayName || u.email?.split('@')[0] || fallback;
+        };
+
+        const finalBuyerName = getCleanName(profile, user, 'مشتري');
+        
         const newChatRef = await addDoc(collection(db, 'chats'), {
           participants: [user.uid, ad.userId],
           adId: id,
           adTitle: ad.title,
           buyerId: user.uid,
           sellerId: ad.userId,
-          buyerName: `${profile?.firstName} ${profile?.lastName}`,
-          sellerName: ad.sellerName,
+          buyerName: finalBuyerName,
+          sellerName: ad.sellerName || 'بائع',
+          buyerEmail: user.email,
+          sellerEmail: ad.sellerEmail || '', // Store emails for backup identification
           updatedAt: serverTimestamp(),
           lastMessage: 'هل السيارة لا تزال متوفرة؟',
           lastSenderId: user.uid,
         });
         chatId = newChatRef.id;
 
-        // Send the actual message document
         await addDoc(collection(db, 'messages'), {
           chatId: chatId,
           senderId: user.uid,
           text: 'هل السيارة لا تزال متوفرة؟',
           createdAt: serverTimestamp(),
         });
+        toast.success('تم بدء محادثة حقيقية');
       } else {
-        chatId = chatSnap.docs[0].id;
+        chatId = existingChat.id;
       }
       
       navigate('/messages');

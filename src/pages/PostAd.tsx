@@ -106,6 +106,9 @@ export default function PostAd() {
       const finalEngine = formData.engine === 'Other' ? formData.customEngine : formData.engine;
       const finalGearbox = formData.gearbox === 'Other' ? formData.customGearbox : formData.gearbox;
 
+      const sellerName = profile ? `${profile.firstName || ''} ${profile.lastName || ''}`.trim() : '';
+      const finalSellerName = sellerName || user.displayName || user.email?.split('@')[0] || 'بائع';
+
       await addDoc(collection(db, 'ads'), {
         ...formData,
         brand: finalBrand,
@@ -115,8 +118,9 @@ export default function PostAd() {
         suspensionRating: Number(formData.suspensionRating),
         tiresRating: Number(formData.tiresRating),
         userId: user.uid,
-        sellerName: `${profile?.firstName} ${profile?.lastName}`,
-        sellerPhone: profile?.phone || '',
+        sellerName: finalSellerName,
+        sellerEmail: user.email,
+        sellerPhone: profile?.phone || user.phoneNumber || '',
         price: Number(formData.price),
         samouni: formData.samouni ? Number(formData.samouni) : null,
         year: Number(formData.year),

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { collection, query, where, orderBy, onSnapshot, addDoc, serverTimestamp, doc, setDoc } from 'firebase/firestore';
+import { collection, query, where, orderBy, onSnapshot, addDoc, serverTimestamp, doc, setDoc, getDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { useAuth } from '../hooks/useAuth';
 import { Chat, Message } from '../types';
@@ -17,6 +17,44 @@ export default function Messages() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [soundEnabled, setSoundEnabled] = useState(true);
+  const [loading, setLoading] = useState(true);
+  const [profiles, setProfiles] = useState<Record<string, any>>({});
+
+  useEffect(() => {
+    const fetchProfiles = async () => {
+      const uids = new Set<string>();
+      chats.forEach(c => {
+        if (c.participants) {
+          c.participants.forEach(uid => uids.add(uid));
+        }
+      });
+      
+      const newProfiles = { ...profiles };
+      let changed = false;
+      
+      for (const uid of uids) {
+        if (!newProfiles[uid]) {
+          try {
+            const d = await getDoc(doc(db, 'users', uid));
+            if (d.exists()) {
+              newProfiles[uid] = d.data();
+              changed = true;
+            }
+          } catch (e) {
+            console.error('Error fetching profile for', uid, e);
+          }
+        }
+      }
+      
+      if (changed) {
+        setProfiles(newProfiles);
+      }
+    };
+    
+    if (chats.length > 0) {
+      fetchProfiles();
+    }
+  }, [chats]);
 
   const playNotificationSound = () => {
     if (soundEnabled) {
@@ -34,13 +72,24 @@ export default function Messages() {
     );
     
     const unsubChats = onSnapshot(q, (snap) => {
-      let updatedChats = snap.docs.map(d => ({ id: d.id, ...d.data() } as Chat));
+      console.log('Current User UID:', user.uid);
+      console.log('Chats snapshot received. Count:', snap.size);
+      
+      let updatedChats = snap.docs.map(d => {
+        const data = d.data();
+        console.log('Chat found:', d.id, 'Participants:', data.participants);
+        return { id: d.id, ...data } as Chat;
+      });
       
       // Sort in memory instead of Firestore orderBy
       updatedChats.sort((a, b) => {
-        const timeA = (a.updatedAt as any)?.toMillis?.() || 0;
-        const timeB = (b.updatedAt as any)?.toMillis?.() || 0;
-        return timeB - timeA;
+        const getTime = (val: any) => {
+          if (!val) return 0;
+          if (typeof val.toMillis === 'function') return val.toMillis();
+          if (val.seconds) return val.seconds * 1000;
+          return 0;
+        };
+        return getTime(b.updatedAt) - getTime(a.updatedAt);
       });
 
       snap.docChanges().forEach((change) => {
@@ -53,8 +102,10 @@ export default function Messages() {
       });
       
       setChats(updatedChats);
+      setLoading(false);
     }, (error) => {
       console.error('Chats Snapshot Error:', error);
+      setLoading(false);
       toast.error('خطأ في تحميل المحادثات: ' + error.message);
     });
     return () => unsubChats();
@@ -76,9 +127,13 @@ export default function Messages() {
       
       // Sort in memory
       updatedMessages.sort((a, b) => {
-        const timeA = (a.createdAt as any)?.toMillis?.() || 0;
-        const timeB = (b.createdAt as any)?.toMillis?.() || 0;
-        return timeA - timeB;
+        const getTime = (val: any) => {
+          if (!val) return 0;
+          if (typeof val.toMillis === 'function') return val.toMillis();
+          if (val.seconds) return val.seconds * 1000;
+          return 0;
+        };
+        return getTime(a.createdAt) - getTime(b.createdAt);
       });
 
       setMessages(updatedMessages);
@@ -163,16 +218,43 @@ export default function Messages() {
                   activeChat?.id === chat.id && "bg-white/5 border-r-4 border-brand-green"
                 )}
               >
-                <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center shrink-0">
-                  <User size={24} className="text-white/40" />
+                <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center shrink-0 overflow-hidden">
+                  {(() => {
+                    const otherUid = chat.participants?.find(id => id !== user.uid);
+                    const otherProfile = otherUid ? profiles[otherUid] : null;
+                    if (otherProfile?.photoURL) {
+                      return <img src={otherProfile.photoURL} alt="" className="w-full h-full object-cover" referrerPolicy="no-referrer" />;
+                    }
+                    return <User size={24} className="text-white/40" />;
+                  })()}
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="flex justify-between items-center mb-1">
                     <span className="font-bold text-sm truncate">
-                      {user.uid === chat.buyerId ? chat.sellerName : chat.buyerName}
+                      {(() => {
+                        const otherUid = chat.participants?.find(id => id !== user.uid);
+                        const otherProfile = otherUid ? profiles[otherUid] : null;
+                        
+                        if (otherProfile) {
+                          return `${otherProfile.firstName || ''} ${otherProfile.lastName || ''}`.trim() || otherProfile.displayName || otherProfile.email?.split('@')[0];
+                        }
+
+                        const isBuyer = user.uid === chat.buyerId;
+                        const otherName = isBuyer ? chat.sellerName : chat.buyerName;
+                        const otherEmail = isBuyer ? chat.sellerEmail : chat.buyerEmail;
+                        
+                        if (otherName && !otherName.includes('undefined')) return otherName;
+                        if (otherEmail) return otherEmail.split('@')[0];
+                        return isBuyer ? 'بائع' : 'مشتري';
+                      })()}
                     </span>
                     <span className="text-[10px] text-white/20">
-                      {chat.updatedAt?.toDate() ? new Date(chat.updatedAt.toDate()).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : ''}
+                      {(() => {
+                        const val = chat.updatedAt;
+                        if (!val) return '';
+                        const date = typeof val.toDate === 'function' ? val.toDate() : (val.seconds ? new Date(val.seconds * 1000) : null);
+                        return date ? date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : '';
+                      })()}
                     </span>
                   </div>
                   <p className="text-[10px] text-brand-green font-bold truncate mb-1">{chat.adTitle}</p>
@@ -201,12 +283,34 @@ export default function Messages() {
                   >
                     <ArrowRight size={20} />
                   </button>
-                  <div className="w-10 h-10 rounded-xl bg-brand-green/10 flex items-center justify-center">
-                    <User size={20} className="text-brand-green" />
+                  <div className="w-10 h-10 rounded-xl bg-brand-green/10 flex items-center justify-center overflow-hidden">
+                    {(() => {
+                      const otherUid = activeChat.participants?.find(id => id !== user.uid);
+                      const otherProfile = otherUid ? profiles[otherUid] : null;
+                      if (otherProfile?.photoURL) {
+                        return <img src={otherProfile.photoURL} alt="" className="w-full h-full object-cover" referrerPolicy="no-referrer" />;
+                      }
+                      return <User size={20} className="text-brand-green" />;
+                    })()}
                   </div>
-                  <div className="min-w-0">
+                  <div className="min-w-0 text-right">
                     <h3 className="font-bold text-sm truncate">
-                      {user.uid === activeChat.buyerId ? activeChat.sellerName : activeChat.buyerName}
+                      {(() => {
+                        const otherUid = activeChat.participants?.find(id => id !== user.uid);
+                        const otherProfile = otherUid ? profiles[otherUid] : null;
+                        
+                        if (otherProfile) {
+                          return `${otherProfile.firstName || ''} ${otherProfile.lastName || ''}`.trim() || otherProfile.displayName || otherProfile.email?.split('@')[0];
+                        }
+
+                        const isBuyer = user.uid === activeChat.buyerId;
+                        const otherName = isBuyer ? activeChat.sellerName : activeChat.buyerName;
+                        const otherEmail = isBuyer ? activeChat.sellerEmail : activeChat.buyerEmail;
+                        
+                        if (otherName && !otherName.includes('undefined')) return otherName;
+                        if (otherEmail) return otherEmail.split('@')[0];
+                        return isBuyer ? 'بائع' : 'مشتري';
+                      })()}
                     </h3>
                     <p className="text-[10px] text-brand-green font-bold uppercase">{activeChat.adTitle}</p>
                   </div>
