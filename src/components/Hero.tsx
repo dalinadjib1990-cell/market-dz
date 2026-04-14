@@ -19,7 +19,7 @@ export default function Hero() {
   };
 
   return (
-    <div className="relative h-[700px] flex items-center justify-center overflow-hidden">
+    <div className="relative min-h-[600px] md:h-[700px] flex items-center justify-center overflow-hidden">
       {/* Background with Algerian Flag Colors Gradient */}
       <div className="absolute inset-0 bg-gradient-to-br from-brand-green/30 via-[#0a0a0a] to-brand-red/20"></div>
       

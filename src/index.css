@@ -9,9 +9,15 @@
   --breakpoint-xs: 400px;
 }
 
+html, body, #root {
+  @apply w-full min-h-screen overflow-x-hidden;
+  margin: 0;
+  padding: 0;
+}
+
 @layer base {
   body {
-    @apply bg-[#0a0a0a] text-white antialiased overflow-x-hidden;
+    @apply bg-[#0a0a0a] text-white antialiased;
   }
 }
 

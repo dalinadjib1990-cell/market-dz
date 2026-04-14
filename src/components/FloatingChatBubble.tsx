@@ -54,16 +54,12 @@ export default function FloatingChatBubble() {
     <motion.div
       drag
       dragConstraints={{ 
-        left: 20, 
-        right: window.innerWidth - 80, 
-        top: 80, 
-        bottom: window.innerHeight - 100 
+        left: -window.innerWidth + 80, 
+        right: 0, 
+        top: 0, 
+        bottom: window.innerHeight - 160 
       }}
-      initial={{ 
-        x: window.innerWidth - 80, 
-        y: window.innerHeight - 160 
-      }}
-      className="fixed top-0 left-0 z-50 cursor-grab active:cursor-grabbing"
+      className="fixed bottom-24 right-6 z-50 cursor-grab active:cursor-grabbing"
       whileHover={{ scale: 1.1 }}
       whileTap={{ scale: 0.9 }}
     >

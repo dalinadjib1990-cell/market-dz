@@ -24,10 +24,10 @@ export default function App() {
 
   return (
     <Router>
-      <div className="min-h-screen bg-[#0a0a0a] flex flex-col">
+      <div className="min-h-screen bg-[#0a0a0a] flex flex-col w-full" dir="rtl">
         <AgreementModal />
         <Header />
-        <main className="flex-1 pb-20 md:pb-0">
+        <main className="flex-1 pb-20 md:pb-0 w-full">
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/search" element={<Search />} />
