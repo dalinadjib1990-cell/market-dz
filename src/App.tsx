@@ -11,17 +11,15 @@ import Login from './pages/Login';
 import AdDetails from './pages/AdDetails';
 import Profile from './pages/Profile';
 import Messages from './pages/Messages';
+import FloatingChatBubble from './components/FloatingChatBubble';
 import { useAuth } from './hooks/useAuth';
+import { LoadingScreen } from './components/LoadingScreen';
 
 export default function App() {
   const { loading } = useAuth();
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
-        <div className="w-16 h-16 border-4 border-brand-green border-t-transparent rounded-full animate-spin"></div>
-      </div>
-    );
+    return <LoadingScreen />;
   }
 
   return (
@@ -40,6 +38,7 @@ export default function App() {
             <Route path="/messages" element={<Messages />} />
           </Routes>
         </main>
+        <FloatingChatBubble />
         <MobileNav />
         <footer className="bg-[#0a0a0a] border-t border-white/10 py-12 hidden md:block">
           <div className="max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-4 gap-12">

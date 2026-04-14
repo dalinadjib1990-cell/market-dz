@@ -17,6 +17,7 @@ export interface Ad {
   userId: string;
   sellerName: string;
   sellerPhone: string;
+  sellerEmail?: string;
   showPhone: boolean;
   title: string;
   description: string;
@@ -34,6 +35,9 @@ export interface Ad {
   salonCondition?: 'جيدة' | 'متوسطة' | 'تحت الوسط';
   suspensionRating?: number;
   tiresRating?: number;
+  engineRating?: number;
+  bodyRating?: number;
+  interiorRating?: number;
   repairs: string[];
   images: string[];
   wilaya: string;
@@ -51,6 +55,8 @@ export interface Comment {
   userName: string;
   text: string;
   createdAt: any;
+  edited?: boolean;
+  deleted?: boolean;
 }
 
 export interface Message {
@@ -59,6 +65,10 @@ export interface Message {
   senderId: string;
   text: string;
   createdAt: any;
+  read?: boolean;
+  imageUrl?: string | null;
+  edited?: boolean;
+  deleted?: boolean;
 }
 
 export interface Chat {
@@ -66,11 +76,17 @@ export interface Chat {
   participants: string[];
   adId: string;
   adTitle?: string;
+  adPrice?: number;
+  adSamouni?: number;
+  adWilaya?: string;
   buyerId?: string;
   sellerId?: string;
   buyerName?: string;
   sellerName?: string;
+  buyerEmail?: string;
+  sellerEmail?: string;
   lastMessage?: string;
   lastSenderId?: string;
   updatedAt: any;
+  unreadCount?: Record<string, number>;
 }

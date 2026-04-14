@@ -19,6 +19,8 @@ export default function Search() {
   const wilayaParam = searchParams.get('wilaya') || '';
   const minPrice = searchParams.get('minPrice') || '';
   const maxPrice = searchParams.get('maxPrice') || '';
+  const priceRange = searchParams.get('priceRange') || '';
+  const mileageRange = searchParams.get('mileageRange') || '';
   const fuelType = searchParams.get('fuelType') || '';
   const minYear = searchParams.get('minYear') || '';
   const maxYear = searchParams.get('maxYear') || '';
@@ -51,6 +53,33 @@ export default function Search() {
 
       if (minPrice) results = results.filter(ad => ad.price >= Number(minPrice));
       if (maxPrice) results = results.filter(ad => ad.price <= Number(maxPrice));
+      
+      // Price Range Filtering (in Millions)
+      if (priceRange) {
+        const [min, max] = priceRange.split('-').map(v => Number(v) * 10000); // Convert Million to actual price (assuming price is in 1000s or similar, but user said 20 million, usually 200,000,000 in DZ context or 2,000,000? Actually 1 Million = 10,000 DA in some contexts, or 1,000,000 DA. In Algeria 1 Million = 10,000 DA. So 20 Million = 200,000 DA.)
+        // Let's assume price in DB is in DA.
+        // 1 Million Centimes = 10,000 DA.
+        // 20 Million Centimes = 200,000 DA.
+        const factor = 10000;
+        if (max) {
+          results = results.filter(ad => ad.price >= Number(min) * factor && ad.price <= Number(max) * factor);
+        } else {
+          results = results.filter(ad => ad.price >= Number(min) * factor);
+        }
+      }
+
+      // Mileage Range Filtering
+      if (mileageRange) {
+        if (mileageRange === '300000+') {
+          results = results.filter(ad => (ad.mileage || 0) >= 300000);
+        } else if (mileageRange === '<100000') {
+          results = results.filter(ad => (ad.mileage || 0) < 100000);
+        } else {
+          const [min, max] = mileageRange.split('-').map(Number);
+          results = results.filter(ad => (ad.mileage || 0) >= min && (ad.mileage || 0) <= max);
+        }
+      }
+
       if (minYear) results = results.filter(ad => ad.year >= Number(minYear));
       if (maxYear) results = results.filter(ad => ad.year <= Number(maxYear));
 
@@ -59,7 +88,7 @@ export default function Search() {
     });
 
     return () => unsubscribe();
-  }, [qParam, brandParam, wilayaParam, minPrice, maxPrice, fuelType, minYear, maxYear]);
+  }, [qParam, brandParam, wilayaParam, minPrice, maxPrice, priceRange, mileageRange, fuelType, minYear, maxYear]);
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-12 space-y-8">
@@ -131,6 +160,46 @@ export default function Search() {
               >
                 <option value="">كل الأنواع</option>
                 {FUEL_TYPES.map(f => <option key={f} value={f}>{f}</option>)}
+              </select>
+            </div>
+
+            <div className="space-y-4">
+              <h4 className="font-bold text-sm uppercase tracking-widest text-white/40">نطاق السعر (مليون سنتيم)</h4>
+              <select 
+                value={priceRange}
+                onChange={(e) => {
+                  searchParams.set('priceRange', e.target.value);
+                  setSearchParams(searchParams);
+                }}
+                className="input-field appearance-none"
+              >
+                <option value="">كل الأسعار</option>
+                <option value="20-50">20 - 50 مليون</option>
+                <option value="50-80">50 - 80 مليون</option>
+                <option value="80-120">80 - 120 مليون</option>
+                <option value="120-160">120 - 160 مليون</option>
+                <option value="160-200">160 - 200 مليون</option>
+                <option value="200-250">200 - 250 مليون</option>
+                <option value="250-300">250 - 300 مليون</option>
+                <option value="300">أكثر من 300 مليون</option>
+              </select>
+            </div>
+
+            <div className="space-y-4">
+              <h4 className="font-bold text-sm uppercase tracking-widest text-white/40">المسافة المقطوعة (كم)</h4>
+              <select 
+                value={mileageRange}
+                onChange={(e) => {
+                  searchParams.set('mileageRange', e.target.value);
+                  setSearchParams(searchParams);
+                }}
+                className="input-field appearance-none"
+              >
+                <option value="">كل المسافات</option>
+                <option value="<100000">أقل من 100 ألف</option>
+                <option value="100000-200000">100 ألف - 200 ألف</option>
+                <option value="200000-300000">200 ألف - 300 ألف</option>
+                <option value="300000+">أكثر من 300 ألف</option>
               </select>
             </div>
 
@@ -208,13 +277,13 @@ export default function Search() {
         {/* Results Grid */}
         <div className="lg:col-span-3">
           {loading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+            <div className="grid grid-cols-2 sm:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6">
               {[1, 2, 3, 4, 5, 6].map(i => (
                 <div key={i} className="glass-card aspect-[16/20] animate-pulse"></div>
               ))}
             </div>
           ) : ads.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+            <div className="grid grid-cols-2 sm:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6">
               {ads.map(ad => (
                 <AdCard key={ad.id} ad={ad} />
               ))}

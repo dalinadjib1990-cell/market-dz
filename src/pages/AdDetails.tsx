@@ -4,13 +4,18 @@ import { doc, getDoc, getDocs, collection, addDoc, setDoc, serverTimestamp, quer
 import { db } from '../lib/firebase';
 import { useAuth } from '../hooks/useAuth';
 import { Ad, Comment } from '../types';
+import { handleFirestoreError, OperationType } from '../lib/firestore-errors';
 import { 
   MapPin, Calendar, Gauge, CheckCircle2, Phone, MessageSquare, 
   Share2, Heart, ChevronLeft, ChevronRight, User, Star, ShieldCheck,
-  Zap, Info
+  Zap, Info, Trash2, Edit2, Activity, X, Search
 } from 'lucide-react';
 import { cn, generateId } from '../lib/utils';
 import { toast } from 'sonner';
+import { motion } from 'motion/react';
+import { 
+  Radar, RadarChart, PolarGrid, PolarAngleAxis, ResponsiveContainer 
+} from 'recharts';
 
 export default function AdDetails() {
   const { id } = useParams();
@@ -22,18 +27,27 @@ export default function AdDetails() {
   const [loading, setLoading] = useState(true);
   const [currentImage, setCurrentImage] = useState(0);
   const [showPhone, setShowPhone] = useState(false);
+  const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
+  const [editCommentText, setEditCommentText] = useState('');
+  const [showZoom, setShowZoom] = useState(false);
 
   useEffect(() => {
     if (!id) return;
     const fetchAd = async () => {
-      const docSnap = await getDoc(doc(db, 'ads', id));
-      if (docSnap.exists()) {
-        setAd({ id: docSnap.id, ...docSnap.data() } as Ad);
-      } else {
-        toast.error('الإعلان غير موجود');
-        navigate('/');
+      if (!id) return;
+      try {
+        const docSnap = await getDoc(doc(db, 'ads', id));
+        if (docSnap.exists()) {
+          setAd({ id: docSnap.id, ...docSnap.data() } as Ad);
+        } else {
+          toast.error('الإعلان غير موجود');
+          navigate('/');
+        }
+      } catch (error) {
+        handleFirestoreError(error, OperationType.GET, `ads/${id}`);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
     fetchAd();
 
@@ -47,7 +61,7 @@ export default function AdDetails() {
 
   const handleAddComment = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user || !id) return;
+    if (!user || !id || !newComment.trim()) return;
     try {
       await addDoc(collection(db, 'comments'), {
         adId: id,
@@ -57,8 +71,31 @@ export default function AdDetails() {
         createdAt: serverTimestamp(),
       });
       setNewComment('');
+      toast.success('تم إضافة التعليق');
     } catch (error) {
       toast.error('فشل إضافة التعليق');
+    }
+  };
+
+  const handleDeleteComment = async (commentId: string) => {
+    if (!window.confirm('هل أنت متأكد من حذف هذا التعليق؟')) return;
+    try {
+      await setDoc(doc(db, 'comments', commentId), { deleted: true, text: 'تم حذف هذا التعليق' }, { merge: true });
+      toast.success('تم حذف التعليق');
+    } catch (error) {
+      toast.error('فشل حذف التعليق');
+    }
+  };
+
+  const handleEditComment = async (commentId: string) => {
+    if (!editCommentText.trim()) return;
+    try {
+      await setDoc(doc(db, 'comments', commentId), { text: editCommentText, edited: true }, { merge: true });
+      setEditingCommentId(null);
+      setEditCommentText('');
+      toast.success('تم تعديل التعليق');
+    } catch (error) {
+      toast.error('فشل تعديل التعليق');
     }
   };
 
@@ -73,8 +110,13 @@ export default function AdDetails() {
       toast.error('بيانات البائع غير مكتملة');
       return;
     }
+
+    if (user.uid === ad.userId) {
+      toast.error('لا يمكنك مراسلة نفسك');
+      return;
+    }
+
     console.log('Starting chat. Current User:', user.uid, 'Ad Owner:', ad.userId);
-    // Allow self-messaging for testing as requested by user
     
     try {
       // Fetch all chats for the user
@@ -108,6 +150,9 @@ export default function AdDetails() {
           participants: [user.uid, ad.userId],
           adId: id,
           adTitle: ad.title,
+          adPrice: ad.price,
+          adSamouni: ad.samouni || null,
+          adWilaya: ad.wilaya,
           buyerId: user.uid,
           sellerId: ad.userId,
           buyerName: finalBuyerName,
@@ -117,6 +162,9 @@ export default function AdDetails() {
           updatedAt: serverTimestamp(),
           lastMessage: 'هل السيارة لا تزال متوفرة؟',
           lastSenderId: user.uid,
+          unreadCount: {
+            [ad.userId]: 1
+          }
         });
         chatId = newChatRef.id;
 
@@ -147,14 +195,37 @@ export default function AdDetails() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 space-y-12">
+      {/* Fullscreen Image Zoom */}
+      {showZoom && (
+        <div 
+          className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center p-4 md:p-12"
+          onClick={() => setShowZoom(false)}
+        >
+          <button className="absolute top-8 right-8 text-white/60 hover:text-white transition-colors">
+            <X size={32} />
+          </button>
+          <img 
+            src={ad.images[currentImage]} 
+            alt={ad.title} 
+            className="max-w-full max-h-full object-contain rounded-2xl shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      )}
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
         {/* Left Column: Images and Info */}
         <div className="lg:col-span-2 space-y-8">
           {/* Image Gallery */}
           <div className="space-y-4">
-            <div className="relative aspect-video rounded-[32px] overflow-hidden glass-card">
-              <img src={ad.images[currentImage]} alt={ad.title} className="w-full h-full object-cover" />
-              <div className="absolute inset-0 flex items-center justify-between px-4 opacity-0 hover:opacity-100 transition-opacity">
+            <div className="relative aspect-video rounded-[32px] overflow-hidden glass-card group cursor-zoom-in" onClick={() => setShowZoom(true)}>
+              <img src={ad.images[currentImage]} alt={ad.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+              <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                <div className="bg-white/10 backdrop-blur-md p-4 rounded-full border border-white/20">
+                  <Search className="text-white" size={24} />
+                </div>
+              </div>
+              <div className="absolute inset-0 flex items-center justify-between px-4 opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => e.stopPropagation()}>
                 <button 
                   onClick={() => setCurrentImage(prev => prev > 0 ? prev - 1 : ad.images.length - 1)}
                   className="w-12 h-12 bg-black/50 backdrop-blur-md rounded-full flex items-center justify-center text-white hover:bg-brand-green transition-colors"
@@ -194,12 +265,12 @@ export default function AdDetails() {
             'border-white/5 bg-white/5'
           )}>
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-              <div className="space-y-2">
+              <div className="space-y-2 text-right">
                 <h1 className="text-3xl font-black tracking-tighter">{ad.title}</h1>
-                <div className="flex items-center gap-4 text-white/40 text-sm">
-                  <span className="flex items-center gap-1"><MapPin size={14} /> {ad.wilaya}</span>
-                  <span className="flex items-center gap-1"><Calendar size={14} /> {ad.createdAt?.toDate().toLocaleDateString('fr-FR')}</span>
+                <div className="flex items-center gap-4 text-white/40 text-sm justify-end">
                   <span className="flex items-center gap-1"><Zap size={14} /> {ad.views} مشاهدة</span>
+                  <span className="flex items-center gap-1"><Calendar size={14} /> {ad.createdAt?.toDate().toLocaleDateString('fr-FR')}</span>
+                  <span className="flex items-center gap-1"><MapPin size={14} /> {ad.wilaya}</span>
                 </div>
               </div>
               <div className="text-right space-y-2">
@@ -241,27 +312,90 @@ export default function AdDetails() {
                 <p className="font-bold">{ad.fuelType}</p>
               </div>
               <div className="p-4 rounded-2xl bg-white/5 border border-white/5 space-y-1">
-                <p className="text-[10px] text-white/40 uppercase font-bold">الحالة</p>
+                <p className="text-[10px] text-white/40 uppercase font-bold">الحالة العامة</p>
                 <p className="font-bold">{ad.condition}</p>
               </div>
-              {ad.salonCondition && (
-                <div className="p-4 rounded-2xl bg-white/5 border border-white/5 space-y-1">
-                  <p className="text-[10px] text-white/40 uppercase font-bold">حالة الصالون</p>
-                  <p className="font-bold">{ad.salonCondition}</p>
+            </div>
+
+            {/* Vehicle Condition Analysis */}
+            <div className="space-y-6 pt-4">
+              <h3 className="text-xl font-bold flex items-center gap-2 justify-end">
+                تحليل حالة السيارة
+                <Activity size={20} className="text-brand-green" />
+              </h3>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                {/* Radar Chart */}
+                <div className="h-64 glass-card p-4 flex items-center justify-center bg-gradient-to-br from-white/5 to-transparent relative overflow-hidden">
+                  <div className="absolute inset-0 bg-brand-green/5 animate-pulse"></div>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <RadarChart cx="50%" cy="50%" outerRadius="80%" data={[
+                      { subject: 'المحرك', A: ad.engineRating || 10, fullMark: 10 },
+                      { subject: 'التعليق', A: ad.suspensionRating || 10, fullMark: 10 },
+                      { subject: 'الهيكل', A: ad.bodyRating || 10, fullMark: 10 },
+                      { subject: 'الصالون', A: ad.interiorRating || 10, fullMark: 10 },
+                      { subject: 'العجلات', A: ad.tiresRating || 10, fullMark: 10 },
+                    ]}>
+                      <PolarGrid stroke="#ffffff10" />
+                      <PolarAngleAxis dataKey="subject" tick={{ fill: '#ffffff60', fontSize: 10, fontWeight: 'bold' }} />
+                      <Radar
+                        name="Condition"
+                        dataKey="A"
+                        stroke="#10b981"
+                        fill="url(#radarGradient)"
+                        fillOpacity={0.7}
+                      />
+                      <defs>
+                        <linearGradient id="radarGradient" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#10b981" stopOpacity={0.9}/>
+                          <stop offset="50%" stopColor="#3b82f6" stopOpacity={0.9}/>
+                          <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0.9}/>
+                        </linearGradient>
+                      </defs>
+                    </RadarChart>
+                  </ResponsiveContainer>
                 </div>
-              )}
-              {ad.suspensionRating && (
-                <div className="p-4 rounded-2xl bg-white/5 border border-white/5 space-y-1">
-                  <p className="text-[10px] text-white/40 uppercase font-bold">حالة التعليق</p>
-                  <p className="font-bold">{ad.suspensionRating}/10</p>
+
+                {/* Percentage Bars */}
+                <div className="space-y-6">
+                  {[
+                    { label: 'المحرك', value: ad.engineRating || 10, color: 'from-emerald-400 via-teal-500 to-cyan-600' },
+                    { label: 'جهاز التعليق', value: ad.suspensionRating || 10, color: 'from-blue-400 via-indigo-500 to-violet-600' },
+                    { label: 'الهيكل', value: ad.bodyRating || 10, color: 'from-amber-400 via-orange-500 to-red-600' },
+                    { label: 'الصالون', value: ad.interiorRating || 10, color: 'from-fuchsia-400 via-purple-500 to-violet-600' },
+                    { label: 'العجلات', value: ad.tiresRating || 10, color: 'from-rose-400 via-red-500 to-orange-600' },
+                  ].map((item, idx) => (
+                    <div key={idx} className="space-y-2">
+                      <div className="flex justify-between items-center text-xs font-bold">
+                        <div className="flex items-center gap-2">
+                          <span className={cn(
+                            "px-2 py-0.5 rounded-md text-[10px] font-black shadow-lg",
+                            item.value >= 8 ? "bg-emerald-500/20 text-emerald-400" :
+                            item.value >= 5 ? "bg-amber-500/20 text-amber-400" : "bg-rose-500/20 text-rose-400"
+                          )}>
+                            {item.value * 10}%
+                          </span>
+                        </div>
+                        <span className="text-white/60">{item.label}</span>
+                      </div>
+                      <div className="h-4 bg-white/5 rounded-full overflow-hidden border border-white/5 p-0.5 shadow-inner">
+                        <motion.div 
+                          initial={{ width: 0 }}
+                          animate={{ width: `${item.value * 10}%` }}
+                          transition={{ duration: 1.5, ease: "easeOut" }}
+                          className={cn(
+                            "h-full rounded-full bg-gradient-to-l relative group",
+                            item.color
+                          )}
+                        >
+                          <div className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                          <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,0.1)_50%,transparent_75%)] bg-[length:20px_20px] animate-shimmer"></div>
+                        </motion.div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              )}
-              {ad.tiresRating && (
-                <div className="p-4 rounded-2xl bg-white/5 border border-white/5 space-y-1">
-                  <p className="text-[10px] text-white/40 uppercase font-bold">حالة العجلات</p>
-                  <p className="font-bold">{ad.tiresRating}/10</p>
-                </div>
-              )}
+              </div>
             </div>
 
             <div className="space-y-4">
@@ -300,16 +434,41 @@ export default function AdDetails() {
 
             <div className="space-y-6">
               {comments.map(comment => (
-                <div key={comment.id} className="flex gap-4">
+                <div key={comment.id} className="flex gap-4 group">
                   <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center shrink-0">
                     <User size={20} className="text-white/40" />
                   </div>
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span className="font-bold text-sm">{comment.userName}</span>
-                      <span className="text-[10px] text-white/20">{new Date(comment.createdAt?.seconds * 1000).toLocaleDateString()}</span>
+                  <div className="space-y-1 flex-1">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold text-sm">{comment.userName}</span>
+                        <span className="text-[10px] text-white/20">{comment.createdAt?.seconds ? new Date(comment.createdAt.seconds * 1000).toLocaleDateString() : ''}</span>
+                        {comment.edited && !comment.deleted && <span className="text-[8px] text-white/20">(معدل)</span>}
+                      </div>
+                      {user?.uid === comment.userId && !comment.deleted && (
+                        <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button onClick={() => { setEditingCommentId(comment.id); setEditCommentText(comment.text); }} className="text-white/20 hover:text-white"><Edit2 size={12} /></button>
+                          <button onClick={() => handleDeleteComment(comment.id)} className="text-white/20 hover:text-red-500"><Trash2 size={12} /></button>
+                        </div>
+                      )}
                     </div>
-                    <p className="text-sm text-white/60">{comment.text}</p>
+                    {editingCommentId === comment.id ? (
+                      <div className="space-y-2 mt-2">
+                        <input 
+                          type="text" 
+                          value={editCommentText} 
+                          onChange={(e) => setEditCommentText(e.target.value)}
+                          className="w-full bg-black/20 border border-white/10 rounded-lg p-2 text-sm outline-none"
+                          autoFocus
+                        />
+                        <div className="flex justify-end gap-2">
+                          <button onClick={() => setEditingCommentId(null)} className="text-xs text-white/40">إلغاء</button>
+                          <button onClick={() => handleEditComment(comment.id)} className="text-xs text-brand-green font-bold">حفظ</button>
+                        </div>
+                      </div>
+                    ) : (
+                      <p className={cn("text-sm text-white/60", comment.deleted && "italic text-white/20")}>{comment.text}</p>
+                    )}
                   </div>
                 </div>
               ))}

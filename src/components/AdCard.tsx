@@ -26,12 +26,12 @@ export const AdCard: React.FC<{ ad: Ad }> = ({ ad }) => {
           alt={ad.title}
           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
         />
-        <div className="absolute top-4 right-4 flex flex-col gap-2 items-end">
-          <div className="bg-brand-green text-white text-sm font-black px-4 py-2 rounded-xl shadow-[0_10px_20px_rgba(0,102,51,0.4)] border border-white/20">
+        <div className="absolute top-3 right-3 flex flex-col gap-1.5 items-end">
+          <div className="bg-brand-green/80 backdrop-blur-md text-white text-[10px] font-black px-3 py-1.5 rounded-lg shadow-lg border border-white/10">
             {ad.price.toLocaleString()} دج
           </div>
           {ad.samouni && (
-            <div className="bg-brand-red text-white text-xs font-black px-3 py-1.5 rounded-lg shadow-[0_10px_20px_rgba(210,16,52,0.4)] border border-white/20">
+            <div className="bg-brand-red/80 backdrop-blur-md text-white text-[9px] font-black px-2 py-1 rounded-md shadow-lg border border-white/10">
               ساموني: {ad.samouni.toLocaleString()}
             </div>
           )}

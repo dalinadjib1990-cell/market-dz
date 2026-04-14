@@ -35,9 +35,11 @@ export default function PostAd() {
     gearbox: 'يدوي (Manuelle)',
     customGearbox: '',
     condition: 'جيدة',
-    salonCondition: 'جيدة',
+    interiorRating: 10,
     suspensionRating: 10,
     tiresRating: 10,
+    engineRating: 10,
+    bodyRating: 10,
     repairs: [] as string[],
     wilaya: profile?.wilaya || 'الجزائر',
     showPhone: true,
@@ -117,6 +119,9 @@ export default function PostAd() {
         gearbox: finalGearbox,
         suspensionRating: Number(formData.suspensionRating),
         tiresRating: Number(formData.tiresRating),
+        engineRating: Number(formData.engineRating),
+        bodyRating: Number(formData.bodyRating),
+        interiorRating: Number(formData.interiorRating),
         userId: user.uid,
         sellerName: finalSellerName,
         sellerEmail: user.email,
@@ -156,7 +161,13 @@ export default function PostAd() {
     <div className="max-w-4xl mx-auto px-4 py-12">
       <div className="text-center mb-12 space-y-4">
         <h2 className="shiny-text text-3xl md:text-5xl">بسم الله الرحمن الرحيم</h2>
-        <h1 className="text-4xl font-black tracking-tighter">أضف إعلان جديد</h1>
+        <div className="relative inline-block">
+          <h3 className="text-xl md:text-2xl font-bold text-brand-green/80 italic">
+            اللهم صلي و سلم على سيدنا محمد
+          </h3>
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -skew-x-12 translate-x-[-100%] animate-shimmer"></div>
+        </div>
+        <h1 className="text-4xl font-black tracking-tighter mt-4">أضف إعلان جديد</h1>
         <p className="text-white/40">أدخل تفاصيل سيارتك بدقة لجذب المشترين</p>
       </div>
 
@@ -400,16 +411,15 @@ export default function PostAd() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-xs font-bold text-white/40 uppercase tracking-widest">حالة الصالون (اختياري)</label>
-              <select
-                value={formData.salonCondition}
-                onChange={(e) => setFormData({ ...formData, salonCondition: e.target.value as any })}
-                className="input-field appearance-none"
-              >
-                <option value="جيدة">جيدة</option>
-                <option value="متوسطة">متوسطة</option>
-                <option value="تحت الوسط">تحت الوسط</option>
-              </select>
+              <label className="text-xs font-bold text-white/40 uppercase tracking-widest">حالة الصالون ({formData.interiorRating}/10)</label>
+              <input
+                type="range"
+                min="1"
+                max="10"
+                value={formData.interiorRating}
+                onChange={(e) => setFormData({ ...formData, interiorRating: Number(e.target.value) })}
+                className="w-full accent-brand-green mt-2"
+              />
             </div>
 
             <div className="space-y-2">
@@ -432,6 +442,30 @@ export default function PostAd() {
                 max="10"
                 value={formData.tiresRating}
                 onChange={(e) => setFormData({ ...formData, tiresRating: Number(e.target.value) })}
+                className="w-full accent-brand-green mt-2"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-white/40 uppercase tracking-widest">حالة المحرك ({formData.engineRating}/10)</label>
+              <input
+                type="range"
+                min="1"
+                max="10"
+                value={formData.engineRating}
+                onChange={(e) => setFormData({ ...formData, engineRating: Number(e.target.value) })}
+                className="w-full accent-brand-green mt-2"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-white/40 uppercase tracking-widest">حالة الهيكل ({formData.bodyRating}/10)</label>
+              <input
+                type="range"
+                min="1"
+                max="10"
+                value={formData.bodyRating}
+                onChange={(e) => setFormData({ ...formData, bodyRating: Number(e.target.value) })}
                 className="w-full accent-brand-green mt-2"
               />
             </div>

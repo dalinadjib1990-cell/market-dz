@@ -1,111 +1,120 @@
 {
   "entities": {
     "user": {
-      "title": "User",
-      "description": "A citizen or administrator in the system.",
+      "title": "User Profile",
+      "description": "User profile information for the car marketplace.",
       "type": "object",
       "properties": {
-        "uid": { "type": "string", "description": "Firebase Auth UID" },
+        "uid": { "type": "string" },
         "email": { "type": "string", "format": "email" },
-        "fullName": { "type": "string" },
-        "nin": { "type": "string", "description": "National Identification Number" },
-        "familyMembersCount": { "type": "number", "description": "Number of family members" },
-        "phone": { "type": "string" },
+        "firstName": { "type": "string" },
+        "lastName": { "type": "string" },
         "wilaya": { "type": "string" },
-        "daira": { "type": "string" },
-        "commune": { "type": "string" },
-        "employmentStatus": { "type": "string", "enum": ["unemployed", "employee", "freelancer"] },
-        "role": { "type": "string", "enum": ["citizen", "admin"] },
-        "status": { "type": "string", "enum": ["active", "blocked"] },
+        "phone": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "rating": { "type": "number" },
+        "isVerified": { "type": "boolean" },
+        "showPhone": { "type": "boolean" },
         "createdAt": { "type": "string", "format": "date-time" }
       },
-      "required": ["uid", "email", "fullName", "nin", "role", "employmentStatus", "familyMembersCount"]
+      "required": ["uid", "email", "firstName", "lastName", "wilaya"]
     },
-    "sheep": {
-      "title": "Sheep",
-      "description": "Livestock available for distribution.",
+    "ad": {
+      "title": "Advertisement",
+      "description": "Car advertisement listing.",
       "type": "object",
       "properties": {
         "id": { "type": "string" },
-        "tagNumber": { "type": "string", "description": "Physical tag ID" },
-        "weight": { "type": "number" },
-        "breed": { "type": "string" },
+        "userId": { "type": "string" },
+        "sellerName": { "type": "string" },
+        "sellerPhone": { "type": "string" },
+        "showPhone": { "type": "boolean" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
         "price": { "type": "number" },
-        "location": { "type": "string", "description": "Pickup location for this sheep" },
-        "status": { "type": "string", "enum": ["available", "reserved", "assigned", "sold", "dead", "replaced"] },
-        "region": { "type": "string" },
+        "samouni": { "type": "number" },
+        "isNegotiable": { "type": "boolean" },
+        "brand": { "type": "string" },
+        "model": { "type": "string" },
+        "year": { "type": "number" },
+        "fuelType": { "type": "string", "enum": ["بنزين", "ديزل", "غاز", "كهرباء"] },
+        "mileage": { "type": "number" },
+        "engine": { "type": "string" },
+        "gearbox": { "type": "string" },
+        "condition": { "type": "string", "enum": ["ممتازة", "جيدة", "متوسطة", "تحت الوسط"] },
+        "salonCondition": { "type": "string" },
+        "suspensionRating": { "type": "number" },
+        "tiresRating": { "type": "number" },
+        "repairs": { "type": "array", "items": { "type": "string" } },
+        "images": { "type": "array", "items": { "type": "string" } },
+        "wilaya": { "type": "string" },
+        "isVerified": { "type": "boolean" },
+        "template": { "type": "string" },
+        "status": { "type": "string", "enum": ["active", "sold"] },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "views": { "type": "number" }
+      },
+      "required": ["userId", "title", "price", "brand", "model", "year", "fuelType", "wilaya", "status"]
+    },
+    "chat": {
+      "title": "Chat",
+      "description": "A conversation between a buyer and a seller.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "participants": { "type": "array", "items": { "type": "string" } },
+        "adId": { "type": "string" },
+        "adTitle": { "type": "string" },
+        "adPrice": { "type": "number" },
+        "adSamouni": { "type": "number" },
+        "adWilaya": { "type": "string" },
+        "buyerId": { "type": "string" },
+        "sellerId": { "type": "string" },
+        "buyerName": { "type": "string" },
+        "sellerName": { "type": "string" },
+        "buyerEmail": { "type": "string" },
+        "sellerEmail": { "type": "string" },
+        "lastMessage": { "type": "string" },
+        "lastSenderId": { "type": "string" },
+        "updatedAt": { "type": "string", "format": "date-time" },
+        "unreadCount": { "type": "object", "description": "Map of userId to unread count" }
+      },
+      "required": ["participants", "adId", "updatedAt"]
+    },
+    "message": {
+      "title": "Message",
+      "description": "A single message within a chat.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "chatId": { "type": "string" },
+        "senderId": { "type": "string" },
+        "text": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "read": { "type": "boolean" }
+      },
+      "required": ["chatId", "senderId", "text", "createdAt"]
+    },
+    "comment": {
+      "title": "Comment",
+      "description": "A comment on an advertisement.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "adId": { "type": "string" },
+        "userId": { "type": "string" },
+        "userName": { "type": "string" },
+        "text": { "type": "string" },
         "createdAt": { "type": "string", "format": "date-time" }
       },
-      "required": ["id", "tagNumber", "status"]
-    },
-    "order": {
-      "title": "Order",
-      "description": "A sheep reservation/purchase by a family.",
-      "type": "object",
-      "properties": {
-        "id": { "type": "string" },
-        "userId": { "type": "string" },
-        "familyHeadNIN": { "type": "string" },
-        "sheepId": { "type": "string" },
-        "appointmentId": { "type": "string" },
-        "status": { "type": "string", "enum": ["pending", "confirmed", "completed", "cancelled"] },
-        "qrCodeData": { "type": "string" },
-        "createdAt": { "type": "string", "format": "date-time" },
-        "completedAt": { "type": "string", "format": "date-time" }
-      },
-      "required": ["id", "userId", "familyHeadNIN", "sheepId", "status"]
-    },
-    "appointment": {
-      "title": "Appointment",
-      "description": "Scheduled pickup time slot.",
-      "type": "object",
-      "properties": {
-        "id": { "type": "string" },
-        "date": { "type": "string", "format": "date" },
-        "timeSlot": { "type": "string" },
-        "location": { "type": "string" },
-        "capacity": { "type": "number" },
-        "currentBookings": { "type": "number" }
-      },
-      "required": ["id", "date", "timeSlot", "location"]
-    },
-    "auditLog": {
-      "title": "Audit Log",
-      "description": "Record of administrative actions.",
-      "type": "object",
-      "properties": {
-        "id": { "type": "string" },
-        "adminId": { "type": "string" },
-        "action": { "type": "string" },
-        "targetId": { "type": "string" },
-        "before": { "type": "object" },
-        "after": { "type": "object" },
-        "timestamp": { "type": "string", "format": "date-time" }
-      },
-      "required": ["id", "adminId", "action", "timestamp"]
-    },
-    "fraudAlert": {
-      "title": "Fraud Alert",
-      "description": "Detected suspicious activity.",
-      "type": "object",
-      "properties": {
-        "id": { "type": "string" },
-        "userId": { "type": "string" },
-        "type": { "type": "string" },
-        "details": { "type": "string" },
-        "timestamp": { "type": "string", "format": "date-time" }
-      },
-      "required": ["id", "type", "timestamp"]
+      "required": ["adId", "userId", "userName", "text", "createdAt"]
     }
   },
   "firestore": {
     "/users/{userId}": { "schema": "user", "description": "User profiles" },
-    "/sheep/{sheepId}": { "schema": "sheep", "description": "Inventory of sheep" },
-    "/orders/{orderId}": { "schema": "order", "description": "Family orders" },
-    "/appointments/{appointmentId}": { "schema": "appointment", "description": "Pickup slots" },
-    "/auditLogs/{logId}": { "schema": "auditLog", "description": "Admin action history" },
-    "/fraudAlerts/{alertId}": { "schema": "fraudAlert", "description": "Suspicious activity logs" },
-    "/nins/{nin}": { "schema": { "type": "object", "properties": { "uid": { "type": "string" }, "createdAt": { "type": "string" } } }, "description": "Unique NIN tracking" },
-    "/phones/{phone}": { "schema": { "type": "object", "properties": { "uid": { "type": "string" }, "createdAt": { "type": "string" } } }, "description": "Unique Phone tracking" }
+    "/ads/{adId}": { "schema": "ad", "description": "Car advertisements" },
+    "/chats/{chatId}": { "schema": "chat", "description": "Conversations" },
+    "/messages/{messageId}": { "schema": "message", "description": "Chat messages" },
+    "/comments/{commentId}": { "schema": "comment", "description": "Ad comments" }
   }
 }

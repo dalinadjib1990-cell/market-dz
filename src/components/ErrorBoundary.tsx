@@ -1,4 +1,4 @@
-import React, { Component, ErrorInfo, ReactNode } from 'react';
+import React, { ErrorInfo, ReactNode } from 'react';
 import { AlertTriangle, RefreshCcw } from 'lucide-react';
 
 interface Props {
@@ -7,17 +7,28 @@ interface Props {
 
 interface State {
   hasError: boolean;
-  error: Error | null;
+  errorMessage: string;
 }
 
-class ErrorBoundary extends Component<Props, State> {
-  public state: State = {
-    hasError: false,
-    error: null,
-  };
+export default class ErrorBoundary extends React.Component<Props, State> {
+  constructor(props: Props) {
+    super(props);
+    this.state = {
+      hasError: false,
+      errorMessage: ''
+    };
+  }
 
   public static getDerivedStateFromError(error: Error): State {
-    return { hasError: true, error };
+    let message = error.message;
+    try {
+      // Try to parse JSON error if it's from Firestore
+      const parsed = JSON.parse(error.message);
+      if (parsed.error) message = parsed.error;
+    } catch (e) {
+      // Not JSON, use raw message
+    }
+    return { hasError: true, errorMessage: message };
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
@@ -26,40 +37,30 @@ class ErrorBoundary extends Component<Props, State> {
 
   public render() {
     if (this.state.hasError) {
-      let errorMessage = "An unexpected error occurred.";
-      try {
-        const parsed = JSON.parse(this.state.error?.message || "");
-        if (parsed.error) errorMessage = parsed.error;
-      } catch (e) {
-        errorMessage = this.state.error?.message || errorMessage;
-      }
-
       return (
         <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center p-4">
-          <div className="max-w-md w-full p-8 rounded-3xl bg-red-500/5 border border-red-500/10 text-center space-y-6">
-            <div className="w-16 h-16 bg-red-500/10 rounded-2xl flex items-center justify-center mx-auto">
+          <div className="glass-card p-8 max-w-md w-full text-center space-y-6">
+            <div className="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mx-auto">
               <AlertTriangle className="text-red-500" size={32} />
             </div>
             <div className="space-y-2">
-              <h2 className="text-xl font-bold text-white">System Error</h2>
+              <h2 className="text-xl font-bold text-white">حدث خطأ غير متوقع</h2>
               <p className="text-sm text-white/40 leading-relaxed">
-                {errorMessage}
+                {this.state.errorMessage || 'نعتذر عن هذا الخلل الفني. يرجى المحاولة مرة أخرى.'}
               </p>
             </div>
             <button
               onClick={() => window.location.reload()}
-              className="w-full py-3 bg-white/5 hover:bg-white/10 text-white rounded-xl font-bold flex items-center justify-center gap-2 transition-all"
+              className="w-full btn-primary flex items-center justify-center gap-2"
             >
               <RefreshCcw size={18} />
-              Reload Application
+              <span>إعادة تحميل الصفحة</span>
             </button>
           </div>
         </div>
       );
     }
 
-    return (this as any).props.children;
+    return this.props.children;
   }
 }
-
-export default ErrorBoundary;
