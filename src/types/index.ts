@@ -6,6 +6,7 @@ export interface UserProfile {
   wilaya: string;
   phone: string;
   photoURL?: string;
+  role?: 'user' | 'admin';
   rating?: number;
   isVerified?: boolean;
   showPhone?: boolean;

@@ -12,6 +12,7 @@
         "wilaya": { "type": "string" },
         "phone": { "type": "string" },
         "photoURL": { "type": "string" },
+        "role": { "type": "string", "enum": ["user", "admin"], "description": "User role for access control" },
         "rating": { "type": "number" },
         "isVerified": { "type": "boolean" },
         "showPhone": { "type": "boolean" },

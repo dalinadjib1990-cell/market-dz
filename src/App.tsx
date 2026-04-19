@@ -11,6 +11,7 @@ import Login from './pages/Login';
 import AdDetails from './pages/AdDetails';
 import Profile from './pages/Profile';
 import Messages from './pages/Messages';
+import Admin from './pages/Admin';
 import FloatingChatBubble from './components/FloatingChatBubble';
 import { useAuth } from './hooks/useAuth';
 import { LoadingScreen } from './components/LoadingScreen';
@@ -36,6 +37,7 @@ export default function App() {
             <Route path="/ad/:id" element={<AdDetails />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/messages" element={<Messages />} />
+            <Route path="/admin" element={<Admin />} />
           </Routes>
         </main>
         <FloatingChatBubble />

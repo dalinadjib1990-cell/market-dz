@@ -1,12 +1,13 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Car, User, LogOut, PlusSquare, MessageSquare, Search } from 'lucide-react';
+import { Car, User, LogOut, PlusSquare, MessageSquare, Search, Shield } from 'lucide-react';
 import { auth } from '../lib/firebase';
 import { useAuth } from '../hooks/useAuth';
 
 export default function Header() {
   const { user, profile } = useAuth();
   const navigate = useNavigate();
+  const isAdmin = profile?.role === 'admin' || user?.email === "dalinadjib1990@gmail.com";
 
   const handleLogout = async () => {
     await auth.signOut();
@@ -54,6 +55,12 @@ export default function Header() {
                     <p className="text-sm font-bold truncate">{profile?.firstName} {profile?.lastName}</p>
                     <p className="text-[10px] text-white/40 truncate">{user.email}</p>
                   </div>
+                  {isAdmin && (
+                    <Link to="/admin" className="flex items-center gap-2 p-2.5 hover:bg-brand-green/10 text-brand-green rounded-lg text-sm transition-colors mb-1">
+                      <Shield size={18} />
+                      لوحة التحكم
+                    </Link>
+                  )}
                   <Link to="/profile" className="flex items-center gap-2 p-2.5 hover:bg-white/5 rounded-lg text-sm transition-colors">
                     <User size={18} />
                     حسابي الشخصي
