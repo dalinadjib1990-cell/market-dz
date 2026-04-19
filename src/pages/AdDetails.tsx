@@ -8,7 +8,7 @@ import { handleFirestoreError, OperationType } from '../lib/firestore-errors';
 import { 
   MapPin, Calendar, Gauge, CheckCircle2, Phone, MessageSquare, 
   Share2, Heart, ChevronLeft, ChevronRight, User, Star, ShieldCheck,
-  Zap, Info, Trash2, Edit2, Activity, X, Search
+  Zap, Info, Trash2, Edit2, Activity, X, Search, Droplets
 } from 'lucide-react';
 import { cn, generateId } from '../lib/utils';
 import { toast } from 'sonner';
@@ -394,6 +394,79 @@ export default function AdDetails() {
                       </div>
                     </div>
                   ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Engine Health Display */}
+            <div className="space-y-6 pt-4">
+              <h3 className="text-xl font-bold flex items-center gap-2 justify-end">
+                صحة المحرك والأداء
+                <ShieldCheck size={20} className="text-brand-green" />
+              </h3>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {/* Oil Consumption Display */}
+                <div className="p-6 rounded-3xl bg-white/5 border border-white/5 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className={cn(
+                      "px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase",
+                      ad.oilConsumption ? "bg-brand-red/10 text-brand-red" : "bg-brand-green/10 text-brand-green"
+                    )}>
+                      {ad.oilConsumption ? "ينقص زيت" : "محرك نظيف"}
+                    </span>
+                    <div className="flex items-center gap-2">
+                       <span className="text-sm font-bold">استهلاك الزيت</span>
+                       <Droplets size={18} className="text-blue-400" />
+                    </div>
+                  </div>
+
+                  {ad.oilConsumption && (
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-xs font-bold">
+                        <span className="text-brand-red">{ad.oilConsumptionPercentage}%</span>
+                        <span className="text-white/40">نسبة النقص</span>
+                      </div>
+                      <div className="h-2 bg-white/5 rounded-full overflow-hidden">
+                        <div className="h-full bg-brand-red" style={{ width: `${ad.oilConsumptionPercentage}%` }}></div>
+                      </div>
+                    </div>
+                  )}
+                  
+                  <p className="text-[10px] text-white/20 text-center">
+                    {ad.oilConsumption 
+                      ? "المحرك يستهلك كمية من الزيت حسب تصريح البائع" 
+                      : "المحرك لا يستهلك الزيت (Pas de consommation d'huile)"}
+                  </p>
+                </div>
+
+                {/* Overheating Display */}
+                <div className="p-6 rounded-3xl bg-white/5 border border-white/5 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className={cn(
+                      "px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase",
+                      ad.overheats ? "bg-brand-red/10 text-brand-red animate-pulse" : "bg-brand-green/10 text-brand-green"
+                    )}>
+                      {ad.overheats ? "يسخن" : "حرارة طبيعية"}
+                    </span>
+                    <div className="flex items-center gap-2">
+                       <span className="text-sm font-bold">درجة الحرارة</span>
+                       <Activity size={18} className={ad.overheats ? "text-brand-red" : "text-brand-green"} />
+                    </div>
+                  </div>
+
+                  <div className="relative h-12 flex items-center gap-2">
+                    <div className="flex-1 h-3 bg-white/5 rounded-full overflow-hidden border border-white/5 flex gap-0.5 p-0.5">
+                      <div className={cn("h-full rounded-full transition-all duration-1000", ad.overheats ? "w-full bg-brand-red shadow-[0_0_15px_rgba(239,68,68,0.5)]" : "w-1/3 bg-brand-green")}></div>
+                    </div>
+                    <Activity size={24} className={cn("shrink-0", ad.overheats ? "text-brand-red animate-bounce" : "text-white/10")} />
+                  </div>
+
+                  <p className="text-[10px] text-white/20 text-center">
+                    {ad.overheats 
+                      ? "تنبيه: محرك السيارة يعاني من مشاكل في السخونة" 
+                      : "نظام التبريد يعمل بشكل مثالي (Température Normale)"}
+                  </p>
                 </div>
               </div>
             </div>

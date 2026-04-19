@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { onAuthStateChanged, User } from 'firebase/auth';
-import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, getDoc, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { auth, db } from '../lib/firebase';
 import { UserProfile } from '../types';
 import { handleFirestoreError, OperationType } from '../lib/firestore-errors';
@@ -19,7 +19,14 @@ export function useAuth() {
           const docSnap = await getDoc(docRef);
           
           if (docSnap.exists()) {
-            setProfile(docSnap.data() as UserProfile);
+            const data = docSnap.data();
+            // Ensure master admin always has admin role in profile
+            if (u.email === "dalinadjib1990@gmail.com" && data.role !== 'admin') {
+              await updateDoc(docRef, { role: 'admin' });
+              setProfile({ ...data, role: 'admin' } as UserProfile);
+            } else {
+              setProfile(data as UserProfile);
+            }
           } else {
             // Create a basic profile if it doesn't exist
             const newProfile: UserProfile = {
@@ -30,6 +37,7 @@ export function useAuth() {
               wilaya: 'الجزائر',
               phone: '',
               photoURL: u.photoURL || '',
+              role: u.email === "dalinadjib1990@gmail.com" ? 'admin' : 'user',
               createdAt: serverTimestamp(),
             };
             await setDoc(docRef, newProfile);

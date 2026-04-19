@@ -124,7 +124,13 @@ export default function Admin() {
                   <tr key={ad.id} className="hover:bg-white/[0.02] transition-colors">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        <img src={ad.images[0]} alt="" className="w-12 h-12 rounded-lg object-cover" />
+                        {ad.images && ad.images.length > 0 ? (
+                          <img src={ad.images[0]} alt="" className="w-12 h-12 rounded-lg object-cover" />
+                        ) : (
+                          <div className="w-12 h-12 rounded-lg bg-white/5 flex items-center justify-center">
+                            <Car size={20} className="text-white/20" />
+                          </div>
+                        )}
                         <div>
                           <p className="font-bold text-sm">{ad.title}</p>
                           <p className="text-[10px] text-white/40">{ad.sellerName}</p>

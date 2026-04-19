@@ -39,6 +39,9 @@ export interface Ad {
   engineRating?: number;
   bodyRating?: number;
   interiorRating?: number;
+  oilConsumption: boolean;
+  oilConsumptionPercentage?: number;
+  overheats: boolean;
   repairs: string[];
   images: string[];
   wilaya: string;

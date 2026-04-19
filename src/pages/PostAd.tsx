@@ -5,7 +5,7 @@ import { db } from '../lib/firebase';
 import { useAuth } from '../hooks/useAuth';
 import { uploadToCloudinary } from '../lib/cloudinary';
 import { BRANDS, MODELS, WILAYAS, FUEL_TYPES, CONDITIONS, REPAIR_OPTIONS, ENGINES, GEARBOXES, AD_TEMPLATES, YEARS } from '../constants/data';
-import { Camera, X, Loader2, CheckCircle2, AlertCircle, PlusSquare, Info, ShieldCheck, Zap, Star } from 'lucide-react';
+import { Camera, X, Loader2, CheckCircle2, AlertCircle, PlusSquare, Info, ShieldCheck, Zap, Star, Thermometer, Droplets } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '../lib/utils';
 
@@ -44,6 +44,9 @@ export default function PostAd() {
     wilaya: profile?.wilaya || 'الجزائر',
     showPhone: true,
     template: 'practical',
+    oilConsumption: false,
+    oilConsumptionPercentage: 0,
+    overheats: false,
   });
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -122,6 +125,9 @@ export default function PostAd() {
         engineRating: Number(formData.engineRating),
         bodyRating: Number(formData.bodyRating),
         interiorRating: Number(formData.interiorRating),
+        oilConsumption: formData.oilConsumption,
+        oilConsumptionPercentage: formData.oilConsumption ? Number(formData.oilConsumptionPercentage) : 0,
+        overheats: formData.overheats,
         userId: user.uid,
         sellerName: finalSellerName,
         sellerEmail: user.email,
@@ -512,6 +518,109 @@ export default function PostAd() {
                   className="input-field mt-2"
                 />
               )}
+            </div>
+          </div>
+        </section>
+
+        {/* Engine Health Section */}
+        <section className="glass-card p-8 space-y-8">
+          <h3 className="text-xl font-bold flex items-center gap-2">
+            <ShieldCheck size={20} className="text-brand-green" />
+            صحة المحرك والأداء
+          </h3>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {/* Oil Consumption */}
+            <div className="space-y-4 p-6 rounded-2xl bg-white/5 border border-white/10">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Droplets size={20} className="text-blue-400" />
+                  <span className="font-bold">استهلاك الزيت</span>
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setFormData({ ...formData, oilConsumption: true })}
+                    className={cn(
+                      "px-4 py-1.5 rounded-lg text-xs font-bold transition-all",
+                      formData.oilConsumption ? "bg-brand-red text-white" : "bg-white/5 text-white/40"
+                    )}
+                  >
+                    ينقص
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setFormData({ ...formData, oilConsumption: false })}
+                    className={cn(
+                      "px-4 py-1.5 rounded-lg text-xs font-bold transition-all",
+                      !formData.oilConsumption ? "bg-brand-green text-white" : "bg-white/5 text-white/40"
+                    )}
+                  >
+                    ما ينقصش
+                  </button>
+                </div>
+              </div>
+
+              {formData.oilConsumption && (
+                <div className="space-y-2 pt-4 border-t border-white/5 animate-in fade-in slide-in-from-top-2 duration-300">
+                  <div className="flex justify-between text-xs font-bold">
+                    <span className="text-white/40">نسبة النقص</span>
+                    <span className="text-brand-red">{formData.oilConsumptionPercentage}%</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="1"
+                    max="100"
+                    value={formData.oilConsumptionPercentage}
+                    onChange={(e) => setFormData({ ...formData, oilConsumptionPercentage: Number(e.target.value) })}
+                    className="w-full accent-brand-red"
+                  />
+                </div>
+              )}
+            </div>
+
+            {/* Overheating */}
+            <div className="space-y-4 p-6 rounded-2xl bg-white/5 border border-white/10">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Thermometer size={20} className="text-orange-400" />
+                  <span className="font-bold">سخونة المحرك</span>
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setFormData({ ...formData, overheats: true })}
+                    className={cn(
+                      "px-4 py-1.5 rounded-lg text-xs font-bold transition-all",
+                      formData.overheats ? "bg-brand-red text-white shadow-lg shadow-brand-red/20" : "bg-white/5 text-white/40"
+                    )}
+                  >
+                    يسخن
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setFormData({ ...formData, overheats: false })}
+                    className={cn(
+                      "px-4 py-1.5 rounded-lg text-xs font-bold transition-all",
+                      !formData.overheats ? "bg-brand-green text-white shadow-lg shadow-brand-green/20" : "bg-white/5 text-white/40"
+                    )}
+                  >
+                    ما يسخنش
+                  </button>
+                </div>
+              </div>
+
+              <div className="pt-4 border-t border-white/5">
+                <div className="flex justify-between text-xs font-bold mb-3">
+                  <span className="text-white/40">مؤشر الحرارة</span>
+                  <span className={formData.overheats ? "text-brand-red animate-pulse" : "text-brand-green"}>
+                    {formData.overheats ? "مرتفعة (Danger)" : "طبيعية (Normal)"}
+                  </span>
+                </div>
+                <div className="h-4 bg-white/5 rounded-full overflow-hidden flex gap-0.5 p-0.5">
+                  <div className={cn("h-full rounded-full transition-all duration-1000", formData.overheats ? "w-full bg-brand-red" : "w-1/3 bg-brand-green")}></div>
+                </div>
+              </div>
             </div>
           </div>
         </section>
