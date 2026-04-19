@@ -4,12 +4,13 @@ import { doc, updateDoc } from 'firebase/firestore';
 import { db, auth } from '../lib/firebase';
 import { useAuth } from '../hooks/useAuth';
 import { WILAYAS } from '../constants/data';
-import { User, Mail, Phone, MapPin, Camera, Loader2, CheckCircle2, LogOut } from 'lucide-react';
+import { User, Mail, Phone, MapPin, Camera, Loader2, CheckCircle2, LogOut, Shield } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function Profile() {
   const { user, profile } = useAuth();
   const navigate = useNavigate();
+  const isAdmin = profile?.role === 'admin' || user?.email === "dalinadjib1990@gmail.com";
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     firstName: '',
@@ -142,6 +143,15 @@ export default function Profile() {
                 <span className="font-bold text-amber-500">4.8/5</span>
               </div>
             </div>
+            {isAdmin && (
+              <button 
+                onClick={() => navigate('/admin')}
+                className="w-full py-4 bg-brand-green text-white rounded-2xl font-black flex items-center justify-center gap-3 transition-all hover:scale-[1.02] shadow-xl shadow-brand-green/20 mb-4"
+              >
+                <Shield size={22} fill="currentColor" />
+                دخول لوحة تحكم المسؤول
+              </button>
+            )}
             <button 
               onClick={handleLogout}
               className="w-full py-3 bg-brand-red/10 hover:bg-brand-red/20 text-brand-red rounded-xl font-bold flex items-center justify-center gap-2 transition-all mt-4"

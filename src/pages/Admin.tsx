@@ -77,6 +77,17 @@ export default function Admin() {
     }
   };
 
+  const handleDeleteUser = async (userId: string) => {
+    if (!window.confirm("هل أنت متأكد من حذف هذا المستخدم؟ سيتم حذف جميع بياناته.")) return;
+    try {
+      await deleteDoc(doc(db, 'users', userId));
+      setUsers(prev => prev.filter(u => u.uid !== userId));
+      toast.success("تم حذف المستخدم بنجاح");
+    } catch (error) {
+      toast.error("فشل حذف المستخدم");
+    }
+  };
+
   return (
     <div className="max-w-7xl mx-auto px-4 py-12 space-y-8">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -195,12 +206,20 @@ export default function Admin() {
                       </span>
                     </td>
                     <td className="px-6 py-4">
-                      <button 
-                        onClick={() => handleToggleUserAdmin(u)}
-                        className={`text-[10px] font-bold px-3 py-1.5 rounded-lg transition-all ${u.role === 'admin' ? 'bg-brand-red/10 text-brand-red' : 'bg-brand-green/10 text-brand-green'}`}
-                      >
-                        {u.role === 'admin' ? 'سحب الأدمن' : 'جعل أدمن'}
-                      </button>
+                      <div className="flex items-center gap-2">
+                        <button 
+                          onClick={() => handleToggleUserAdmin(u)}
+                          className={`text-[10px] font-bold px-3 py-1.5 rounded-lg transition-all ${u.role === 'admin' ? 'bg-brand-red/10 text-brand-red' : 'bg-brand-green/10 text-brand-green'}`}
+                        >
+                          {u.role === 'admin' ? 'سحب الأدمن' : 'جعل أدمن'}
+                        </button>
+                        <button 
+                          onClick={() => handleDeleteUser(u.uid)}
+                          className="p-1.5 text-brand-red hover:bg-brand-red/10 rounded-lg transition-all"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}

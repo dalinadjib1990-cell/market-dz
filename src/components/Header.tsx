@@ -42,6 +42,12 @@ export default function Header() {
                 <MessageSquare size={20} />
                 <span className="absolute top-1 right-1 w-2 h-2 bg-brand-red rounded-full"></span>
               </Link>
+              {isAdmin && (
+                <Link to="/admin" className="flex items-center gap-2 px-3 py-2 bg-brand-green/10 text-brand-green rounded-xl text-[10px] sm:text-xs font-black border border-brand-green/20 hover:bg-brand-green hover:text-white transition-all shadow-lg shadow-brand-green/5">
+                  <Shield size={16} />
+                  <span className="hidden xs:inline">لوحة المسؤول</span>
+                </Link>
+              )}
               <Link to="/post" className="flex items-center gap-2 btn-primary !py-2 !px-3 sm:!px-6 text-xs sm:text-sm whitespace-nowrap">
                 <PlusSquare size={18} />
                 <span>أضف إعلان</span>

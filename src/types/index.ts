@@ -39,7 +39,7 @@ export interface Ad {
   engineRating?: number;
   bodyRating?: number;
   interiorRating?: number;
-  oilConsumption: boolean;
+  oilConsumption: 'none' | 'little' | 'much';
   oilConsumptionPercentage?: number;
   overheats: boolean;
   repairs: string[];

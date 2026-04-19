@@ -41,6 +41,13 @@ export const AdCard: React.FC<{ ad: Ad }> = ({ ad }) => {
             <CheckCircle2 size={16} className="text-brand-green" />
           </div>
         )}
+        {ad.status === 'sold' && (
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px] flex items-center justify-center z-20">
+            <div className="bg-brand-red text-white text-[10px] font-black px-4 py-1.5 rounded-full rotate-[-15deg] shadow-2xl border-2 border-white/20 animate-pulse uppercase tracking-widest">
+              Vendu / تم البيع
+            </div>
+          </div>
+        )}
       </div>
       
       <div className="p-5 space-y-4">

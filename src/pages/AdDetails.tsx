@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { doc, getDoc, getDocs, collection, addDoc, setDoc, serverTimestamp, query, where, onSnapshot } from 'firebase/firestore';
+import { doc, getDoc, getDocs, collection, addDoc, setDoc, serverTimestamp, query, where, onSnapshot, updateDoc, deleteDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { useAuth } from '../hooks/useAuth';
 import { Ad, Comment } from '../types';
@@ -8,7 +8,8 @@ import { handleFirestoreError, OperationType } from '../lib/firestore-errors';
 import { 
   MapPin, Calendar, Gauge, CheckCircle2, Phone, MessageSquare, 
   Share2, Heart, ChevronLeft, ChevronRight, User, Star, ShieldCheck,
-  Zap, Info, Trash2, Edit2, Activity, X, Search, Droplets
+  Zap, Info, Trash2, Edit2, Activity, X, Search, Droplets, CheckCircle,
+  AlertTriangle, Thermometer
 } from 'lucide-react';
 import { cn, generateId } from '../lib/utils';
 import { toast } from 'sonner';
@@ -96,6 +97,29 @@ export default function AdDetails() {
       toast.success('تم تعديل التعليق');
     } catch (error) {
       toast.error('فشل تعديل التعليق');
+    }
+  };
+
+  const handleMarkAsSold = async () => {
+    if (!ad || !user || (user.uid !== ad.userId && profile?.role !== 'admin')) return;
+    try {
+      await updateDoc(doc(db, 'ads', ad.id), { status: 'sold' });
+      setAd({ ...ad, status: 'sold' });
+      toast.success('تم تحديد السيارة كمباعة (Vendu)');
+    } catch (error) {
+      toast.error('فشل تحديث الحالة');
+    }
+  };
+
+  const handleDeleteAd = async () => {
+    if (!ad || !user || (user.uid !== ad.userId && profile?.role !== 'admin')) return;
+    if (!window.confirm('هل أنت متأكد من حذف هذا الإعلان نهائياً؟')) return;
+    try {
+      await deleteDoc(doc(db, 'ads', ad.id));
+      toast.success('تم حذف الإعلان');
+      navigate('/');
+    } catch (error) {
+      toast.error('فشل حذف الإعلان');
     }
   };
 
@@ -266,7 +290,14 @@ export default function AdDetails() {
           )}>
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div className="space-y-2 text-right">
-                <h1 className="text-3xl font-black tracking-tighter">{ad.title}</h1>
+                <div className="flex items-center gap-3 justify-end">
+                  {ad.status === 'sold' && (
+                    <span className="px-4 py-1.5 bg-brand-red text-white text-xs font-black rounded-full animate-pulse shadow-lg shadow-brand-red/20 uppercase tracking-widest">
+                      Vendu / تم البيع
+                    </span>
+                  )}
+                  <h1 className="text-3xl font-black tracking-tighter">{ad.title}</h1>
+                </div>
                 <div className="flex items-center gap-4 text-white/40 text-sm justify-end">
                   <span className="flex items-center gap-1"><Zap size={14} /> {ad.views} مشاهدة</span>
                   <span className="flex items-center gap-1"><Calendar size={14} /> {ad.createdAt?.toDate().toLocaleDateString('fr-FR')}</span>
@@ -407,66 +438,108 @@ export default function AdDetails() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {/* Oil Consumption Display */}
-                <div className="p-6 rounded-3xl bg-white/5 border border-white/5 space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span className={cn(
-                      "px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase",
-                      ad.oilConsumption ? "bg-brand-red/10 text-brand-red" : "bg-brand-green/10 text-brand-green"
-                    )}>
-                      {ad.oilConsumption ? "ينقص زيت" : "محرك نظيف"}
-                    </span>
-                    <div className="flex items-center gap-2">
-                       <span className="text-sm font-bold">استهلاك الزيت</span>
-                       <Droplets size={18} className="text-blue-400" />
+                <div className="p-8 rounded-[2.5rem] bg-white/5 border border-white/5 space-y-6 relative overflow-hidden group shadow-2xl">
+                  <div className="absolute top-0 right-0 w-48 h-48 bg-blue-500/5 rounded-full blur-[80px] -mr-24 -mt-24 transition-all group-hover:bg-blue-500/10"></div>
+                  <div className="flex items-center justify-between relative z-10">
+                    <div className="flex flex-col">
+                       <span className="text-xl font-black text-white/90">حالة الزيت</span>
+                       <span className="text-[10px] text-white/40 font-bold uppercase tracking-[0.2em]">Oil System Status</span>
+                    </div>
+                    <div className="p-4 rounded-2xl bg-blue-500/10 border border-blue-500/20 shadow-inner">
+                       <Droplets size={32} className={cn(
+                         ad.oilConsumption === 'much' ? "text-brand-red animate-pulse" : 
+                         ad.oilConsumption === 'little' ? "text-amber-500" : "text-blue-400"
+                       )} />
                     </div>
                   </div>
 
-                  {ad.oilConsumption && (
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-xs font-bold">
-                        <span className="text-brand-red">{ad.oilConsumptionPercentage}%</span>
-                        <span className="text-white/40">نسبة النقص</span>
-                      </div>
-                      <div className="h-2 bg-white/5 rounded-full overflow-hidden">
-                        <div className="h-full bg-brand-red" style={{ width: `${ad.oilConsumptionPercentage}%` }}></div>
-                      </div>
+                  <div className="space-y-4 relative z-10">
+                    <div className="flex justify-between items-end">
+                      <span className={cn(
+                        "text-2xl font-black italic tracking-tighter",
+                        ad.oilConsumption === 'much' ? "text-brand-red" : 
+                        ad.oilConsumption === 'little' ? "text-amber-500" : "text-brand-green"
+                      )}>
+                        {ad.oilConsumption === 'much' ? "ينقص بزاف" : 
+                         ad.oilConsumption === 'little' ? "ينقص شوي" : 
+                         "نظيف تماماً"}
+                      </span>
+                      {ad.oilConsumption !== 'none' && (
+                        <span className="text-white/40 text-sm font-bold">{ad.oilConsumptionPercentage}%</span>
+                      )}
                     </div>
-                  )}
+                    
+                    <div className="h-4 bg-white/5 rounded-full overflow-hidden border border-white/10 p-1 flex gap-1">
+                      <motion.div 
+                        initial={{ width: 0 }}
+                        animate={{ width: ad.oilConsumption === 'none' ? '100%' : `${100 - (ad.oilConsumptionPercentage || 0)}%` }}
+                        className={cn(
+                          "h-full rounded-full transition-all duration-1000",
+                          ad.oilConsumption === 'none' ? "bg-brand-green" : 
+                          ad.oilConsumption === 'little' ? "bg-amber-500" : "bg-brand-red"
+                        )} 
+                      />
+                    </div>
+                  </div>
                   
-                  <p className="text-[10px] text-white/20 text-center">
-                    {ad.oilConsumption 
-                      ? "المحرك يستهلك كمية من الزيت حسب تصريح البائع" 
-                      : "المحرك لا يستهلك الزيت (Pas de consommation d'huile)"}
-                  </p>
+                  <div className="pt-2 flex items-center gap-3 relative z-10">
+                    <div className="flex-1 h-[1px] bg-white/10"></div>
+                    <p className="text-[10px] font-black text-white/20 uppercase">
+                      {ad.oilConsumption === 'none' ? "SAFE OPERATING LEVEL" : "WARNING: CHECK PERIODICALLY"}
+                    </p>
+                    <div className="flex-1 h-[1px] bg-white/10"></div>
+                  </div>
                 </div>
 
                 {/* Overheating Display */}
-                <div className="p-6 rounded-3xl bg-white/5 border border-white/5 space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span className={cn(
-                      "px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase",
-                      ad.overheats ? "bg-brand-red/10 text-brand-red animate-pulse" : "bg-brand-green/10 text-brand-green"
+                <div className="p-8 rounded-[2.5rem] bg-white/5 border border-white/5 space-y-6 relative overflow-hidden group shadow-2xl">
+                  <div className="absolute top-0 left-0 w-48 h-48 bg-orange-500/5 rounded-full blur-[80px] -ml-24 -mt-24 transition-all group-hover:bg-orange-500/10"></div>
+                  <div className="flex items-center justify-between relative z-10">
+                    <div className="flex flex-col">
+                       <span className="text-xl font-black text-white/90">حرارة المحرك</span>
+                       <span className="text-[10px] text-white/40 font-bold uppercase tracking-[0.2em]">Thermostat Gauge</span>
+                    </div>
+                    <div className={cn(
+                      "p-4 rounded-2xl border shadow-inner transition-colors",
+                      ad.overheats ? "bg-brand-red/10 border-brand-red/20" : "bg-brand-green/10 border-brand-green/20"
                     )}>
-                      {ad.overheats ? "يسخن" : "حرارة طبيعية"}
-                    </span>
-                    <div className="flex items-center gap-2">
-                       <span className="text-sm font-bold">درجة الحرارة</span>
-                       <Activity size={18} className={ad.overheats ? "text-brand-red" : "text-brand-green"} />
+                       <Gauge size={32} className={ad.overheats ? "text-brand-red animate-bounce" : "text-brand-green"} />
                     </div>
                   </div>
 
-                  <div className="relative h-12 flex items-center gap-2">
-                    <div className="flex-1 h-3 bg-white/5 rounded-full overflow-hidden border border-white/5 flex gap-0.5 p-0.5">
-                      <div className={cn("h-full rounded-full transition-all duration-1000", ad.overheats ? "w-full bg-brand-red shadow-[0_0_15px_rgba(239,68,68,0.5)]" : "w-1/3 bg-brand-green")}></div>
+                  <div className="relative z-10 space-y-4">
+                    <div className="flex justify-between items-end">
+                      <span className={cn(
+                        "text-2xl font-black italic tracking-tighter",
+                        ad.overheats ? "text-brand-red animate-pulse" : "text-brand-green"
+                      )}>
+                        {ad.overheats ? "حرارة مرتفعة" : "حرارة مستقرة"}
+                      </span>
+                      <Thermometer size={20} className={ad.overheats ? "text-brand-red" : "text-white/20"} />
                     </div>
-                    <Activity size={24} className={cn("shrink-0", ad.overheats ? "text-brand-red animate-bounce" : "text-white/10")} />
+
+                    <div className="flex gap-2">
+                       {[...Array(12)].map((_, i) => (
+                         <div 
+                           key={i} 
+                           className={cn(
+                             "flex-1 h-3 rounded-sm transition-all duration-300",
+                             ad.overheats 
+                               ? (i < 8 ? "bg-orange-500/30" : "bg-brand-red shadow-[0_0_10px_rgba(239,68,68,0.5)]") 
+                               : (i < 4 ? "bg-brand-green" : "bg-white/5")
+                           )}
+                         />
+                       ))}
+                    </div>
                   </div>
 
-                  <p className="text-[10px] text-white/20 text-center">
-                    {ad.overheats 
-                      ? "تنبيه: محرك السيارة يعاني من مشاكل في السخونة" 
-                      : "نظام التبريد يعمل بشكل مثالي (Température Normale)"}
-                  </p>
+                  <div className="pt-2 flex items-center gap-3 relative z-10">
+                    <div className="flex-1 h-[1px] bg-white/10"></div>
+                    <p className="text-[10px] font-black text-white/20 uppercase">
+                      {ad.overheats ? "CRITICAL SYSTEM TEMPERATURE" : "OPTIMAL THERMAL PERFORMANCE"}
+                    </p>
+                    <div className="flex-1 h-[1px] bg-white/10"></div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -567,6 +640,31 @@ export default function AdDetails() {
             </div>
 
             <div className="space-y-4">
+              {(user?.uid === ad.userId || profile?.role === 'admin') && (
+                <div className="grid grid-cols-2 gap-4 pb-4">
+                  <button 
+                    onClick={handleMarkAsSold}
+                    disabled={ad.status === 'sold'}
+                    className={cn(
+                      "flex items-center justify-center gap-2 py-4 rounded-2xl font-black text-sm transition-all border-2",
+                      ad.status === 'sold' 
+                        ? "bg-white/5 border-white/10 text-white/20 cursor-not-allowed" 
+                        : "bg-brand-green/10 border-brand-green/20 text-brand-green hover:bg-brand-green hover:text-white"
+                    )}
+                  >
+                    <CheckCircle size={20} />
+                    {ad.status === 'sold' ? 'تم البيع' : 'تحديد كمباع (Vendu)'}
+                  </button>
+                  <button 
+                    onClick={handleDeleteAd}
+                    className="flex items-center justify-center gap-2 py-4 rounded-2xl bg-brand-red/10 border-2 border-brand-red/20 text-brand-red font-black text-sm hover:bg-brand-red hover:text-white transition-all shadow-lg shadow-brand-red/10"
+                  >
+                    <Trash2 size={20} />
+                    حذف الإعلان نهائياً
+                  </button>
+                </div>
+              )}
+
               {ad.showPhone ? (
                 <button 
                   onClick={() => setShowPhone(!showPhone)}

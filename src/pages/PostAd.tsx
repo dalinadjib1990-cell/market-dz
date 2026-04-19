@@ -44,7 +44,7 @@ export default function PostAd() {
     wilaya: profile?.wilaya || 'الجزائر',
     showPhone: true,
     template: 'practical',
-    oilConsumption: false,
+    oilConsumption: 'none',
     oilConsumptionPercentage: 0,
     overheats: false,
   });
@@ -126,7 +126,7 @@ export default function PostAd() {
         bodyRating: Number(formData.bodyRating),
         interiorRating: Number(formData.interiorRating),
         oilConsumption: formData.oilConsumption,
-        oilConsumptionPercentage: formData.oilConsumption ? Number(formData.oilConsumptionPercentage) : 0,
+        oilConsumptionPercentage: formData.oilConsumption !== 'none' ? Number(formData.oilConsumptionPercentage) : 0,
         overheats: formData.overheats,
         userId: user.uid,
         sellerName: finalSellerName,
@@ -540,20 +540,30 @@ export default function PostAd() {
                 <div className="flex gap-2">
                   <button
                     type="button"
-                    onClick={() => setFormData({ ...formData, oilConsumption: true })}
+                    onClick={() => setFormData({ ...formData, oilConsumption: 'much' })}
                     className={cn(
-                      "px-4 py-1.5 rounded-lg text-xs font-bold transition-all",
-                      formData.oilConsumption ? "bg-brand-red text-white" : "bg-white/5 text-white/40"
+                      "px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all",
+                      formData.oilConsumption === 'much' ? "bg-brand-red text-white" : "bg-white/5 text-white/40"
                     )}
                   >
-                    ينقص
+                    ينقص بزاف
                   </button>
                   <button
                     type="button"
-                    onClick={() => setFormData({ ...formData, oilConsumption: false })}
+                    onClick={() => setFormData({ ...formData, oilConsumption: 'little' })}
                     className={cn(
-                      "px-4 py-1.5 rounded-lg text-xs font-bold transition-all",
-                      !formData.oilConsumption ? "bg-brand-green text-white" : "bg-white/5 text-white/40"
+                      "px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all",
+                      formData.oilConsumption === 'little' ? "bg-amber-500 text-white" : "bg-white/5 text-white/40"
+                    )}
+                  >
+                    ينقص شوي
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setFormData({ ...formData, oilConsumption: 'none' })}
+                    className={cn(
+                      "px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all",
+                      formData.oilConsumption === 'none' ? "bg-brand-green text-white" : "bg-white/5 text-white/40"
                     )}
                   >
                     ما ينقصش
@@ -561,7 +571,7 @@ export default function PostAd() {
                 </div>
               </div>
 
-              {formData.oilConsumption && (
+              {formData.oilConsumption !== 'none' && (
                 <div className="space-y-2 pt-4 border-t border-white/5 animate-in fade-in slide-in-from-top-2 duration-300">
                   <div className="flex justify-between text-xs font-bold">
                     <span className="text-white/40">نسبة النقص</span>

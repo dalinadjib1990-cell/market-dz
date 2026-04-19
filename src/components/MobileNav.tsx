@@ -1,21 +1,25 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Home, Search, PlusSquare, MessageSquare, User } from 'lucide-react';
+import { Home, Search, PlusSquare, MessageSquare, User, Shield } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { cn } from '../lib/utils';
 
 export default function MobileNav() {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const location = useLocation();
 
   if (!user) return null;
+
+  const isAdmin = profile?.role === 'admin' || user?.email === "dalinadjib1990@gmail.com";
 
   const navItems = [
     { icon: Home, label: 'الرئيسية', path: '/' },
     { icon: Search, label: 'البحث', path: '/search' },
     { icon: PlusSquare, label: 'نشر', path: '/post', primary: true },
     { icon: MessageSquare, label: 'الرسائل', path: '/messages' },
-    { icon: User, label: 'حسابي', path: '/profile' },
+    isAdmin 
+      ? { icon: Shield, label: 'المسؤول', path: '/admin' }
+      : { icon: User, label: 'حسابي', path: '/profile' },
   ];
 
   return (
