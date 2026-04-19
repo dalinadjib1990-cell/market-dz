@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import Header from './components/Header';
 import MobileNav from './components/MobileNav';
@@ -17,7 +17,7 @@ import { useAuth } from './hooks/useAuth';
 import { LoadingScreen } from './components/LoadingScreen';
 
 export default function App() {
-  const { loading } = useAuth();
+  const { loading, isAdmin } = useAuth();
 
   if (loading) {
     return <LoadingScreen />;
@@ -61,7 +61,10 @@ export default function App() {
             <div>
               <h4 className="font-bold mb-6">روابط سريعة</h4>
               <ul className="space-y-3 text-sm text-white/40">
-                <li><a href="#" className="hover:text-brand-green transition-colors">عن المنصة</a></li>
+                {isAdmin && (
+                  <li><Link to="/admin" className="text-brand-green font-black">لوحة المسؤول (Admin)</Link></li>
+                )}
+                <li><Link to="/" className="hover:text-brand-green transition-colors">عن المنصة</Link></li>
                 <li><a href="#" className="hover:text-brand-green transition-colors">شروط الاستخدام</a></li>
                 <li><a href="#" className="hover:text-brand-green transition-colors">سياسة الخصوصية</a></li>
                 <li><a href="#" className="hover:text-brand-green transition-colors">اتصل بنا</a></li>

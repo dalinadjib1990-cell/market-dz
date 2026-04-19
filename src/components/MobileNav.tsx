@@ -5,12 +5,10 @@ import { useAuth } from '../hooks/useAuth';
 import { cn } from '../lib/utils';
 
 export default function MobileNav() {
-  const { user, profile } = useAuth();
+  const { user, profile, isAdmin } = useAuth();
   const location = useLocation();
 
   if (!user) return null;
-
-  const isAdmin = profile?.role === 'admin' || user?.email === "dalinadjib1990@gmail.com";
 
   const navItems = [
     { icon: Home, label: 'الرئيسية', path: '/' },

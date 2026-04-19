@@ -8,9 +8,8 @@ import { User, Mail, Phone, MapPin, Camera, Loader2, CheckCircle2, LogOut, Shiel
 import { toast } from 'sonner';
 
 export default function Profile() {
-  const { user, profile } = useAuth();
+  const { user, profile, isAdmin } = useAuth();
   const navigate = useNavigate();
-  const isAdmin = profile?.role === 'admin' || user?.email === "dalinadjib1990@gmail.com";
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     firstName: '',
@@ -152,6 +151,22 @@ export default function Profile() {
                 دخول لوحة تحكم المسؤول
               </button>
             )}
+            
+            {/* Master Admin Status Check */}
+            {user?.email?.toLowerCase().trim() === "dalinadjib1990@gmail.com" && (
+              <div className="p-4 bg-white/5 rounded-xl border border-brand-green/20 text-[10px] space-y-2 mb-4">
+                <div className="flex items-center gap-2 text-brand-green font-black uppercase">
+                  <Shield size={12} />
+                  <span>بيانات المالك</span>
+                </div>
+                <div className="grid grid-cols-2 gap-2 text-white/60">
+                   <p>Email: <span className="text-white font-mono">{user.email}</span></p>
+                   <p>Role: <span className="text-white font-mono">{profile?.role || 'null'}</span></p>
+                   <p>Calculated isAdmin: <span className={isAdmin ? "text-brand-green" : "text-brand-red"}>{isAdmin ? 'YES' : 'NO'}</span></p>
+                </div>
+              </div>
+            )}
+
             <button 
               onClick={handleLogout}
               className="w-full py-3 bg-brand-red/10 hover:bg-brand-red/20 text-brand-red rounded-xl font-bold flex items-center justify-center gap-2 transition-all mt-4"

@@ -8,13 +8,11 @@ import { Ad, UserProfile } from '../types';
 import { toast } from 'sonner';
 
 export default function Admin() {
-  const { user, profile } = useAuth();
+  const { user, profile, isAdmin } = useAuth();
   const [ads, setAds] = useState<Ad[]>([]);
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'ads' | 'users'>('ads');
-
-  const isAdmin = profile?.role === 'admin' || user?.email === "dalinadjib1990@gmail.com";
 
   useEffect(() => {
     if (!isAdmin) return;

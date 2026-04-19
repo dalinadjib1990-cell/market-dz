@@ -5,9 +5,8 @@ import { auth } from '../lib/firebase';
 import { useAuth } from '../hooks/useAuth';
 
 export default function Header() {
-  const { user, profile } = useAuth();
+  const { user, profile, isAdmin } = useAuth();
   const navigate = useNavigate();
-  const isAdmin = profile?.role === 'admin' || user?.email === "dalinadjib1990@gmail.com";
 
   const handleLogout = async () => {
     await auth.signOut();

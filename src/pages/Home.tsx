@@ -4,9 +4,12 @@ import { db } from '../lib/firebase';
 import { Ad } from '../types';
 import Hero from '../components/Hero';
 import { AdCard } from '../components/AdCard';
-import { ArrowRight, Star, ShieldCheck, Zap } from 'lucide-react';
+import { ArrowRight, Star, ShieldCheck, Zap, Shield } from 'lucide-react';
+import { useAuth } from '../hooks/useAuth';
+import { Link } from 'react-router-dom';
 
 export default function Home() {
+  const { user, profile, isAdmin } = useAuth();
   const [latestAds, setLatestAds] = useState<Ad[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -21,6 +24,27 @@ export default function Home() {
 
   return (
     <div className="space-y-20 pb-20">
+      {isAdmin && (
+        <div className="bg-brand-green/20 backdrop-blur-md border-y border-brand-green/30 py-4 px-4 sticky top-20 z-40">
+           <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                 <div className="w-10 h-10 bg-brand-green rounded-xl flex items-center justify-center text-white shadow-lg">
+                    <Shield size={20} fill="currentColor" />
+                 </div>
+                 <div>
+                    <h4 className="text-sm font-black text-white">منطقة المسؤول</h4>
+                    <p className="text-[10px] text-white/40 font-bold uppercase">Admin Dashboard Shortcut</p>
+                 </div>
+              </div>
+              <Link 
+                to="/admin" 
+                className="px-6 py-2 bg-brand-green text-white rounded-xl text-xs font-black shadow-lg shadow-brand-green/20 hover:scale-105 transition-transform"
+              >
+                دخول لوحة التحكم
+              </Link>
+           </div>
+        </div>
+      )}
       <div className="pt-8 text-center space-y-4">
         <h2 className="shiny-text text-2xl md:text-5xl">بسم الله الرحمن الرحيم</h2>
         <div className="flex justify-center">

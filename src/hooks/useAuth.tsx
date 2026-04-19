@@ -15,13 +15,17 @@ export function useAuth() {
       setUser(u);
       if (u) {
         try {
+          const userEmail = u.email?.toLowerCase().trim();
+          const masterEmail = "dalinadjib1990@gmail.com";
+          const isMaster = userEmail === masterEmail;
+          
           const docRef = doc(db, 'users', u.uid);
           const docSnap = await getDoc(docRef);
           
           if (docSnap.exists()) {
             const data = docSnap.data();
             // Ensure master admin always has admin role in profile
-            if (u.email === "dalinadjib1990@gmail.com" && data.role !== 'admin') {
+            if (isMaster && data.role !== 'admin') {
               await updateDoc(docRef, { role: 'admin' });
               setProfile({ ...data, role: 'admin' } as UserProfile);
             } else {
@@ -37,7 +41,7 @@ export function useAuth() {
               wilaya: 'الجزائر',
               phone: '',
               photoURL: u.photoURL || '',
-              role: u.email === "dalinadjib1990@gmail.com" ? 'admin' : 'user',
+              role: isMaster ? 'admin' : 'user',
               createdAt: serverTimestamp(),
             };
             await setDoc(docRef, newProfile);
@@ -55,5 +59,10 @@ export function useAuth() {
     return () => unsubscribe();
   }, []);
 
-  return { user, profile, loading };
+  return { 
+    user, 
+    profile, 
+    loading, 
+    isAdmin: profile?.role === 'admin' || user?.email?.toLowerCase().trim() === "dalinadjib1990@gmail.com"
+  };
 }
