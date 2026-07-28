@@ -70,3 +70,4 @@ html, body, #root {
 .input-field {
   @apply w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 focus:border-brand-green/50 outline-none transition-all;
 }
+.markdown-body p { margin-bottom: 1rem; } .markdown-body ul { list-style-type: disc; padding-inline-start: 1.5rem; margin-bottom: 1rem; } .markdown-body strong { color: #fff; font-weight: 700; }

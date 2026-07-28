@@ -9,8 +9,55 @@ import { Send, User, Search, MoreVertical, Phone, MessageSquare, Volume2, Volume
 import { toast } from 'sonner';
 import { cn } from '../lib/utils';
 import { useNavigate } from 'react-router-dom';
+import Markdown from 'react-markdown';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, Cell, ResponsiveContainer } from 'recharts';
 
 const NOTIFICATION_SOUND = 'https://assets.mixkit.co/active_storage/sfx/2358/2358-preview.mp3';
+
+function AIMessageContent({ text }: { text: string }) {
+  let displayText = text || '';
+  let chartData: any = null;
+
+  const jsonMatch = text.match(/```json\n([\s\S]*?)\n```/);
+  if (jsonMatch) {
+    try {
+      const parsed = JSON.parse(jsonMatch[1]);
+      if (parsed.repairCosts) {
+        chartData = parsed.repairCosts;
+      }
+      displayText = text.replace(jsonMatch[0], '');
+    } catch (e) {}
+  }
+
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="markdown-body text-white/90 leading-relaxed text-sm">
+        <Markdown>{displayText}</Markdown>
+      </div>
+      {chartData && (
+        <div className="h-48 w-full bg-black/20 rounded-xl p-3 border border-indigo-500/20 mt-2">
+          <h4 className="text-xs font-bold text-indigo-200 mb-3 text-center">مصاريف الترقيع المتوقعة (دج)</h4>
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={chartData} layout="vertical" margin={{ top: 0, right: 30, left: 0, bottom: 0 }}>
+              <XAxis type="number" hide />
+              <YAxis dataKey="name" type="category" width={70} tick={{ fill: '#a5b4fc', fontSize: 10 }} axisLine={false} tickLine={false} />
+              <Tooltip 
+                cursor={{fill: 'rgba(255,255,255,0.05)'}} 
+                contentStyle={{backgroundColor: '#1e1b4b', borderColor: '#3730a3', borderRadius: '8px', textAlign: 'right', fontSize: '12px'}}
+                formatter={(value: any) => [`${value} دج`, 'التكلفة']}
+              />
+              <Bar dataKey="cost" radius={[0, 4, 4, 0]}>
+                {chartData.map((entry: any, index: number) => (
+                  <Cell key={`cell-${index}`} fill={entry.cost > 0 ? '#ef4444' : '#10b981'} />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function Messages() {
   const { user, profile } = useAuth();
@@ -655,7 +702,11 @@ export default function Messages() {
                           {msg.imageUrl && (
                             <img src={msg.imageUrl} alt="Sent" className="rounded-xl mb-2 max-w-full h-auto cursor-pointer hover:opacity-90" onClick={() => window.open(msg.imageUrl)} />
                           )}
-                          <p className={cn(msg.deleted && "italic text-white/20")}>{msg.text}</p>
+                          {msg.senderId === 'AI_EXPERT' ? (
+                            <AIMessageContent text={msg.text} />
+                          ) : (
+                            <p className={cn(msg.deleted && "italic text-white/20")}>{msg.text}</p>
+                          )}
                           {msg.edited && !msg.deleted && <span className="text-[8px] text-white/20 block mt-1">(معدلة)</span>}
                         </>
                       )}

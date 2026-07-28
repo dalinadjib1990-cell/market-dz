@@ -15,8 +15,10 @@ import { cn, generateId } from '../lib/utils';
 import { toast } from 'sonner';
 import { motion } from 'motion/react';
 import { 
-  Radar, RadarChart, PolarGrid, PolarAngleAxis, ResponsiveContainer 
+  Radar, RadarChart, PolarGrid, PolarAngleAxis, ResponsiveContainer,
+  BarChart, Bar, XAxis, YAxis, Tooltip, Cell
 } from 'recharts';
+import Markdown from 'react-markdown';
 
 export default function AdDetails() {
   const { id } = useParams();
@@ -32,6 +34,7 @@ export default function AdDetails() {
   const [editCommentText, setEditCommentText] = useState('');
   const [showZoom, setShowZoom] = useState(false);
   const [assessingCar, setAssessingCar] = useState(false);
+  const [aiAssessmentResult, setAiAssessmentResult] = useState<string | null>(null);
 
   useEffect(() => {
     if (!id) return;
@@ -149,18 +152,8 @@ export default function AdDetails() {
       }
       const data = await response.json();
       
-      // We can display it in a toast or standard alert, or modal. 
-      // For now, let's use toast.success with longer duration and large text.
-      toast.success(
-        <div className="flex flex-col gap-2 max-w-sm">
-          <div className="flex items-center gap-2 font-bold text-white">
-            <Bot size={16} />
-            <span>رأي الخبير الآلي</span>
-          </div>
-          <p className="text-sm text-white/90 leading-relaxed whitespace-pre-wrap">{data.reply}</p>
-        </div>,
-        { id: loadingToast, duration: 20000, style: { background: '#10b981', border: 'none' } }
-      );
+      setAiAssessmentResult(data.reply);
+      toast.success('تم التقييم بنجاح', { id: loadingToast });
     } catch (error: any) {
       console.error(error);
       toast.error(error.message || 'حدث خطأ أثناء الاتصال بالخبير الآلي', { id: loadingToast });
@@ -263,6 +256,24 @@ export default function AdDetails() {
 
   if (loading) return <div className="min-h-screen flex items-center justify-center"><div className="w-12 h-12 border-4 border-brand-green border-t-transparent rounded-full animate-spin"></div></div>;
   if (!ad) return null;
+
+  let displayAssessmentText = aiAssessmentResult || '';
+  let assessmentChartData: any = null;
+
+  if (aiAssessmentResult) {
+    const jsonMatch = aiAssessmentResult.match(/```json\n([\s\S]*?)\n```/);
+    if (jsonMatch) {
+      try {
+        const parsed = JSON.parse(jsonMatch[1]);
+        if (parsed.repairCosts) {
+          assessmentChartData = parsed.repairCosts;
+        }
+        displayAssessmentText = aiAssessmentResult.replace(jsonMatch[0], '');
+      } catch (e) {
+        console.error("Failed to parse chart data", e);
+      }
+    }
+  }
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 space-y-12">
@@ -770,6 +781,50 @@ export default function AdDetails() {
           </div>
         </div>
       </div>
+
+      {aiAssessmentResult && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm z-[100]" onClick={() => setAiAssessmentResult(null)}>
+          <div className="bg-[#111] border border-brand-green/30 rounded-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh] shadow-2xl shadow-brand-green/20" onClick={e => e.stopPropagation()}>
+            <div className="p-4 border-b border-white/10 flex items-center justify-between bg-white/5">
+              <div className="flex items-center gap-3 text-brand-green">
+                <Bot size={24} />
+                <h3 className="font-bold text-xl">تحليل الخبير الآلي</h3>
+              </div>
+              <button onClick={() => setAiAssessmentResult(null)} className="p-2 text-white/40 hover:text-white hover:bg-white/10 rounded-xl transition-all">
+                <X size={20} />
+              </button>
+            </div>
+            
+            <div className="p-6 overflow-y-auto no-scrollbar flex flex-col gap-6">
+              <div className="markdown-body text-white/90 leading-relaxed text-base">
+                <Markdown>{displayAssessmentText}</Markdown>
+              </div>
+
+              {assessmentChartData && (
+                <div className="h-64 w-full bg-white/5 rounded-xl p-4 border border-white/10 mt-2">
+                  <h4 className="text-sm font-bold text-white/60 mb-4 text-center">توقعات مصاريف الصيانة والترقيع (دج)</h4>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={assessmentChartData} layout="vertical" margin={{ top: 0, right: 40, left: 0, bottom: 0 }}>
+                      <XAxis type="number" hide />
+                      <YAxis dataKey="name" type="category" width={90} tick={{ fill: '#888', fontSize: 13 }} axisLine={false} tickLine={false} />
+                      <Tooltip 
+                        cursor={{fill: 'rgba(255,255,255,0.05)'}} 
+                        contentStyle={{backgroundColor: '#111', borderColor: '#333', borderRadius: '8px', textAlign: 'right'}}
+                        formatter={(value: any) => [`${value} دج`, 'التكلفة']}
+                      />
+                      <Bar dataKey="cost" radius={[0, 4, 4, 0]}>
+                        {assessmentChartData.map((entry: any, index: number) => (
+                          <Cell key={`cell-${index}`} fill={entry.cost > 0 ? '#ef4444' : '#10b981'} />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
