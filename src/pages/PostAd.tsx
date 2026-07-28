@@ -662,14 +662,9 @@ export default function PostAd() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="space-y-2">
               <label className="text-xs font-bold text-white/40 uppercase tracking-widest">الولاية</label>
-              <select
-                required
-                value={formData.wilaya}
-                onChange={(e) => setFormData({ ...formData, wilaya: e.target.value })}
-                className="input-field appearance-none"
-              >
-                {WILAYAS.map(w => <option key={w} value={w}>{w}</option>)}
-              </select>
+              <div className="input-field bg-white/5 text-white/60 cursor-not-allowed flex items-center">
+                {formData.wilaya} (تلقائي من حسابك)
+              </div>
             </div>
             <div className="space-y-2 flex flex-col justify-center">
               <label className="flex items-center gap-3 cursor-pointer p-4 rounded-xl bg-white/5 border border-white/10 hover:border-brand-green/50 transition-all">

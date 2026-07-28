@@ -1,21 +1,23 @@
 import React, { useState, useEffect } from 'react';
-import { collection, query, orderBy, limit, getDocs, deleteDoc, doc, updateDoc } from 'firebase/firestore';
+import { collection, query, orderBy, limit, getDocs, deleteDoc, doc, updateDoc, onSnapshot } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { useAuth } from '../hooks/useAuth';
 import { Navigate } from 'react-router-dom';
-import { Users, Car, AlertTriangle, Trash2, CheckCircle, XCircle, Shield } from 'lucide-react';
+import { Users, Car, AlertTriangle, Trash2, CheckCircle, XCircle, Shield, ShieldAlert, History } from 'lucide-react';
 import { Ad, UserProfile } from '../types';
+import { securityService, SecurityEvent } from '../services/securityService';
 import { toast } from 'sonner';
 
 export default function Admin() {
-  const { user, profile, isAdmin } = useAuth();
+  const { user, profile, isAdmin, loading: authLoading } = useAuth();
   const [ads, setAds] = useState<Ad[]>([]);
   const [users, setUsers] = useState<UserProfile[]>([]);
+  const [securityEvents, setSecurityEvents] = useState<SecurityEvent[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'ads' | 'users'>('ads');
+  const [activeTab, setActiveTab] = useState<'ads' | 'users' | 'security'>('ads');
 
   useEffect(() => {
-    if (!isAdmin) return;
+    if (authLoading || !isAdmin || !user) return;
 
     const fetchData = async () => {
       try {
@@ -33,7 +35,25 @@ export default function Admin() {
     };
 
     fetchData();
-  }, [isAdmin]);
+
+    // Real-time security alerts subscription
+    const unsubscribeSecurity = securityService.subscribeToAlerts((events) => {
+      setSecurityEvents(events);
+    });
+
+    return () => unsubscribeSecurity();
+  }, [isAdmin, authLoading, user]);
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-brand-green border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-white/60 font-bold">جاري التحقق من الصلاحيات...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!user || !isAdmin) {
     return <Navigate to="/" />;
@@ -112,6 +132,14 @@ export default function Admin() {
             <Users size={18} />
             المستخدمين
           </button>
+          <button 
+            onClick={() => setActiveTab('security')}
+            className={`flex items-center gap-2 px-6 py-2.5 rounded-lg text-sm font-bold transition-all ${activeTab === 'security' ? 'bg-brand-red text-white shadow-lg' : 'text-white/40 hover:text-white'}`}
+          >
+            <ShieldAlert size={18} />
+            التنبيهات الأمنية
+            {securityEvents.length > 0 && <span className="w-2 h-2 bg-white rounded-full animate-pulse"></span>}
+          </button>
         </div>
       </div>
 
@@ -175,7 +203,7 @@ export default function Admin() {
               </tbody>
             </table>
           </div>
-        ) : (
+        ) : activeTab === 'users' ? (
           <div className="overflow-x-auto">
             <table className="w-full text-right">
               <thead className="bg-white/5 border-b border-white/10">
@@ -223,6 +251,45 @@ export default function Admin() {
                 ))}
               </tbody>
             </table>
+          </div>
+        ) : (
+          <div className="p-8 space-y-6">
+             <div className="flex items-center justify-between">
+                <h3 className="text-xl font-bold flex items-center gap-2">
+                   <ShieldAlert className="text-brand-red" />
+                   سجل التنبيهات الأمنية (آخر 20 محاولة)
+                </h3>
+             </div>
+             
+             {securityEvents.length === 0 ? (
+                <div className="text-center py-12 text-white/40">
+                   <Shield className="mx-auto mb-4 opacity-10" size={48} />
+                   <p>لا توجد تهديدات أمنية مسجلة حالياً. الموقع آمن.</p>
+                </div>
+             ) : (
+                <div className="space-y-4">
+                   {securityEvents.map(event => (
+                      <div key={event.id} className="p-4 bg-white/5 border border-white/10 rounded-xl flex items-start justify-between gap-4">
+                         <div className="space-y-1">
+                            <div className="flex items-center gap-2">
+                               <span className={`text-[10px] font-black px-2 py-0.5 rounded uppercase ${
+                                  event.type === 'unauthorized_access' ? 'bg-amber-500/10 text-amber-500' : 
+                                  event.type === 'input_injection_attempt' ? 'bg-brand-red/10 text-brand-red' : 'bg-blue-500/10 text-blue-500'
+                               }`}>
+                                  {event.type}
+                               </span>
+                               <span className="text-[10px] text-white/20">
+                                  {event.timestamp?.toDate().toLocaleString('ar-DZ')}
+                               </span>
+                            </div>
+                            <p className="text-sm font-bold">{event.description}</p>
+                            <p className="text-xs text-white/40 font-mono">User: {event.userEmail} | Path: {event.path}</p>
+                         </div>
+                         <ShieldAlert className="text-brand-red opacity-50 shrink-0" size={24} />
+                      </div>
+                   ))}
+                </div>
+             )}
           </div>
         )}
       </div>

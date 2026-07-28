@@ -13,14 +13,19 @@ service cloud.firestore {
     // GLOBAL HELPERS
     // ===============================================================
     function isSignedIn() { return request.auth != null; }
-    function isMasterAdmin() { return isSignedIn() && request.auth.token.email == "dalinadjib1990@gmail.com"; }
+    function isEmailVerified() { return isSignedIn() && request.auth.token.email_verified == true; }
     
-    function getUserData(userId) {
-      return get(/databases/$(database)/documents/users/$(userId)).data;
+    function isMasterAdmin() { 
+      return isSignedIn() && 
+             request.auth.token.email.matches('(?i)dalinadjib1990@gmail\\.com');
     }
     
     function isAdmin() { 
-      return isMasterAdmin() || (isSignedIn() && getUserData(request.auth.uid).get('role', 'user') == 'admin'); 
+      return isMasterAdmin() || (
+        isSignedIn() && 
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('role', 'user') == 'admin'
+      );
     }
 
     function incoming() { return request.resource.data; }
@@ -125,6 +130,17 @@ service cloud.firestore {
       allow create: if isSignedIn();
       allow update: if (isSignedIn() && existing().userId == request.auth.uid) || isAdmin();
       allow delete: if (isSignedIn() && existing().userId == request.auth.uid) || isAdmin();
+    }
+
+    match /security_events/{eventId} {
+      // Allow admins to see security alerts
+      allow read: if isAdmin();
+      // Allow creation of security events if signed in
+      allow create: if isSignedIn() 
+        && incoming().userId == request.auth.uid
+        && incoming().type in ['unauthorized_access', 'suspicious_activity', 'input_injection_attempt']
+        && incoming().timestamp == request.time;
+      allow update, delete: if false;
     }
   }
 }

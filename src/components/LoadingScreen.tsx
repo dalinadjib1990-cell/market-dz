@@ -1,7 +1,25 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Settings, Zap } from 'lucide-react';
 
+const AZKAR = [
+  "سبحان الله وبحمده، سبحان الله العظيم",
+  "لا إله إلا الله، محمد رسول الله",
+  "أستغفر الله العظيم وأتوب إليه",
+  "اللهم صل وسلم على نبينا محمد",
+  "لا حول ولا قوة إلا بالله العلي العظيم",
+  "الحمد لله حمداً كثيراً طيباً مباركاً فيه"
+];
+
 export const LoadingScreen: React.FC = () => {
+  const [zekrIndex, setZekrIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setZekrIndex((prev) => (prev + 1) % AZKAR.length);
+    }, 3000); // Change every 3 seconds
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <div className="min-h-screen bg-[#0a0a0a] flex flex-col items-center justify-center space-y-8">
       <div className="relative">
@@ -37,9 +55,19 @@ export const LoadingScreen: React.FC = () => {
         <div className="w-48 h-1.5 bg-white/5 rounded-full overflow-hidden mx-auto border border-white/5">
           <div className="h-full bg-brand-green animate-[loading_2s_ease-in-out_infinite]"></div>
         </div>
-        <p className="text-[10px] text-white/20 font-bold uppercase tracking-[0.2em]">
+        <p className="text-[10px] text-white/20 font-bold uppercase tracking-[0.2em] mb-4">
           Market Auto DZ
         </p>
+        
+        {/* Azkar Section */}
+        <div className="h-10 flex items-center justify-center overflow-hidden transition-all duration-500 pt-8">
+          <p 
+            key={zekrIndex}
+            className="text-brand-green/80 font-bold text-sm md:text-base animate-in fade-in slide-in-from-bottom-2 duration-500"
+          >
+            {AZKAR[zekrIndex]}
+          </p>
+        </div>
       </div>
 
       <style>{`

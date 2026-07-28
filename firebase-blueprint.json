@@ -109,6 +109,22 @@
         "createdAt": { "type": "string", "format": "date-time" }
       },
       "required": ["adId", "userId", "userName", "text", "createdAt"]
+    },
+    "security_event": {
+      "title": "Security Event",
+      "description": "Logged security incidents and alerts.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "userEmail": { "type": "string" },
+        "type": { "type": "string", "enum": ["unauthorized_access", "suspicious_activity", "input_injection_attempt"] },
+        "description": { "type": "string" },
+        "path": { "type": "string" },
+        "userAgent": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "type", "description", "timestamp"]
     }
   },
   "firestore": {
@@ -116,6 +132,7 @@
     "/ads/{adId}": { "schema": "ad", "description": "Car advertisements" },
     "/chats/{chatId}": { "schema": "chat", "description": "Conversations" },
     "/messages/{messageId}": { "schema": "message", "description": "Chat messages" },
-    "/comments/{commentId}": { "schema": "comment", "description": "Ad comments" }
+    "/comments/{commentId}": { "schema": "comment", "description": "Ad comments" },
+    "/security_events/{eventId}": { "schema": "security_event", "description": "Security alerts and logs" }
   }
 }

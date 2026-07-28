@@ -14,10 +14,37 @@ import Messages from './pages/Messages';
 import Admin from './pages/Admin';
 import FloatingChatBubble from './components/FloatingChatBubble';
 import { useAuth } from './hooks/useAuth';
+import { AuthProvider } from './context/AuthContext';
 import { LoadingScreen } from './components/LoadingScreen';
+import { SecurityMonitor } from './components/SecurityMonitor';
+import { securityService, SecurityEvent } from './services/securityService';
+import { ShieldAlert } from 'lucide-react';
+import { toast } from 'sonner';
 
-export default function App() {
-  const { loading, isAdmin } = useAuth();
+function AppContent() {
+  const { loading, isAdmin, user } = useAuth();
+
+  // Master Admin Real-time Security Alerts
+  React.useEffect(() => {
+    if (user?.email === "dalinadjib1990@gmail.com") {
+      const unsubscribe = securityService.subscribeToAlerts((events) => {
+        const latestEvent = events[0];
+        if (latestEvent && latestEvent.timestamp) {
+           // Only show toast if event is very recent (last 30 seconds)
+           const eventTime = latestEvent.timestamp.toDate().getTime();
+           const now = Date.now();
+           if (now - eventTime < 30000) {
+              toast.error(`تنبيه أمني عاجل: ${latestEvent.description}`, {
+                description: `المستخدم: ${latestEvent.userEmail} | المسار: ${latestEvent.path}`,
+                duration: 10000,
+                icon: <ShieldAlert size={20} className="text-brand-red animate-pulse" />
+              });
+           }
+        }
+      });
+      return () => unsubscribe();
+    }
+  }, [user]);
 
   if (loading) {
     return <LoadingScreen />;
@@ -26,6 +53,7 @@ export default function App() {
   return (
     <Router>
       <div className="min-h-screen bg-[#0a0a0a] flex flex-col w-full" dir="rtl">
+        <SecurityMonitor />
         <AgreementModal />
         <Header />
         <main className="flex-1 pb-20 md:pb-0 w-full">
@@ -103,5 +131,13 @@ export default function App() {
         <Toaster position="top-center" richColors />
       </div>
     </Router>
+  );
+}
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
   );
 }

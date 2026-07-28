@@ -15,9 +15,7 @@ export default function MobileNav() {
     { icon: Search, label: 'البحث', path: '/search' },
     { icon: PlusSquare, label: 'نشر', path: '/post', primary: true },
     { icon: MessageSquare, label: 'الرسائل', path: '/messages' },
-    isAdmin 
-      ? { icon: Shield, label: 'المسؤول', path: '/admin' }
-      : { icon: User, label: 'حسابي', path: '/profile' },
+    { icon: User, label: 'حسابي', path: '/profile' },
   ];
 
   return (

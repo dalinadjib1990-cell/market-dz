@@ -35,18 +35,25 @@ export default function FloatingChatBubble() {
         // Play sound if last message is new and from someone else
         if (data.lastMessage && data.lastSenderId !== user.uid) {
           const msgId = `${doc.id}_${data.updatedAt?.seconds}`;
-          if (lastMessageId && lastMessageId !== msgId) {
-            const audio = new Audio(NOTIFICATION_SOUND);
-            audio.play().catch(console.error);
-          }
-          setLastMessageId(msgId);
+          // Use a functional check to avoid stale closure or dependency on lastMessageId
+          setLastMessageId(prevId => {
+            if (prevId && prevId !== msgId) {
+              const audio = new Audio(NOTIFICATION_SOUND);
+              audio.play().catch(() => {}); // Ignore interaction errors
+            }
+            return msgId;
+          });
         }
       });
       setUnreadCount(total);
+    }, (error) => {
+      if (error.code !== 'permission-denied') {
+        console.error("FloatingChatBubble listener error:", error);
+      }
     });
 
     return () => unsubscribe();
-  }, [user, lastMessageId]);
+  }, [user]); // Removed lastMessageId dependency
 
   if (!user || !isVisible) return null;
 

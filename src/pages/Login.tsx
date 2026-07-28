@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
-import { auth, googleProvider, db } from '../lib/firebase';
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, setPersistence, browserLocalPersistence, browserSessionPersistence } from 'firebase/auth';
+import { auth, db } from '../lib/firebase';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
-import { Car, Mail, Lock, Chrome, ArrowLeft, User, Phone, MapPin, Loader2 } from 'lucide-react';
+import { Car, Mail, Lock, ArrowLeft, User, Phone, MapPin, Loader2, Eye, EyeOff } from 'lucide-react';
 import { toast } from 'sonner';
 import { WILAYAS } from '../constants/data';
 
@@ -11,6 +11,7 @@ export default function Login() {
   const [isRegister, setIsRegister] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [wilaya, setWilaya] = useState('الجزائر');
@@ -19,47 +20,12 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleGoogleLogin = async () => {
-    setLoading(true);
-    try {
-      const result = await signInWithPopup(auth, googleProvider);
-      const user = result.user;
-      
-      await setDoc(doc(db, 'users', user.uid), {
-        uid: user.uid,
-        email: user.email,
-        firstName: user.displayName?.split(' ')[0] || '',
-        lastName: user.displayName?.split(' ')[1] || '',
-        wilaya: 'الجزائر',
-        phone: '',
-        photoURL: user.photoURL,
-        createdAt: serverTimestamp(),
-      }, { merge: true });
-
-      toast.success('تم تسجيل الدخول بنجاح');
-      navigate('/');
-    } catch (error: any) {
-      console.error('Google Login Error:', error);
-      if (error.code === 'auth/unauthorized-domain') {
-        toast.error('هذا النطاق (Domain) غير مصرح به في Firebase. يرجى إضافته في إعدادات Firebase Console.');
-      } else if (error.code === 'auth/network-request-failed') {
-        toast.error('فشل الاتصال بالشبكة. يرجى التأكد من إيقاف مانع الإعلانات (Ad-blocker) وتفعيل ملفات تعريف الارتباط (Cookies).');
-      } else if (error.code === 'auth/popup-blocked') {
-        toast.error('تم حظر النافذة المنبثقة. يرجى السماح بالمنبثقات لهذا الموقع.');
-      } else if (error.code === 'auth/popup-closed-by-user') {
-        toast.info('تم إغلاق نافذة تسجيل الدخول.');
-      } else {
-        toast.error(`فشل تسجيل الدخول: ${error.message || 'خطأ غير معروف'}`);
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
+      await setPersistence(auth, rememberMe ? browserLocalPersistence : browserSessionPersistence);
+      
       if (isRegister) {
         // If user provided phone but no email, we create a dummy email for Firebase Auth
         const authEmail = email || `${phone}@marketautodz.com`;
@@ -249,12 +215,19 @@ export default function Login() {
                 <Lock className="absolute right-4 top-1/2 -translate-y-1/2 text-white/20" size={18} />
                 <input
                   required
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="input-field pr-12 !py-3"
+                  className="input-field pr-12 pl-12 !py-3"
                   placeholder="••••••••"
                 />
+                <button 
+                  type="button" 
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40 hover:text-white transition-colors"
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
               </div>
             </div>
 
@@ -269,29 +242,6 @@ export default function Login() {
               )}
             </button>
           </form>
-
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-white/5"></div>
-            </div>
-            <div className="relative flex justify-center text-[10px] uppercase font-bold tracking-widest">
-              <span className="bg-[#111111] px-4 text-white/20">أو عبر</span>
-            </div>
-          </div>
-
-          <button onClick={handleGoogleLogin} className="w-full btn-secondary !py-4 flex items-center justify-center gap-3">
-            <Chrome size={20} />
-            Google تسجيل الدخول عبر
-          </button>
-
-          <div className="p-4 rounded-xl bg-white/5 border border-white/5 space-y-2">
-            <p className="text-[10px] text-white/40 font-bold text-center">
-              تواجه مشكلة في تسجيل الدخول بجوجل؟
-            </p>
-            <p className="text-[9px] text-white/20 text-center leading-relaxed">
-              يرجى التأكد من إيقاف مانع الإعلانات (Ad-blocker) والسماح بملفات تعريف الارتباط (Cookies) في متصفحك.
-            </p>
-          </div>
 
           <p className="text-center text-sm text-white/40">
             {isRegister ? 'لديك حساب بالفعل؟' : 'ليس لديك حساب؟'}
