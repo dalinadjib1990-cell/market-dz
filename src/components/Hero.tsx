@@ -20,13 +20,19 @@ export default function Hero() {
 
   return (
     <div className="relative min-h-[600px] md:h-[700px] flex items-center justify-center overflow-hidden">
-      {/* Background with Algerian Flag Colors Gradient */}
-      <div className="absolute inset-0 bg-gradient-to-br from-brand-green/30 via-[#0a0a0a] to-brand-red/20"></div>
+      {/* Background Image of Dark Car with Glowing Lights */}
+      <div 
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-30 mix-blend-screen"
+        style={{ backgroundImage: "url('https://images.unsplash.com/photo-1603584173870-7f23fdae1b7a?auto=format&fit=crop&q=80')" }}
+      ></div>
+
+      {/* Gradient overlays to ensure text readability */}
+      <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/80 to-transparent"></div>
+      <div className="absolute inset-0 bg-gradient-to-br from-brand-green/20 via-transparent to-brand-red/10"></div>
       
       {/* Animated Background Elements */}
-      <div className="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20"></div>
-      <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-brand-green/20 rounded-full blur-[120px] animate-pulse"></div>
-      <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-brand-red/20 rounded-full blur-[120px] animate-pulse delay-1000"></div>
+      <div className="absolute top-1/4 left-1/4 w-[400px] h-[400px] bg-brand-green/20 rounded-full blur-[120px] animate-pulse"></div>
+      <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-cyan-500/10 rounded-full blur-[120px] animate-pulse delay-1000"></div>
 
       <div className="relative z-10 max-w-5xl w-full px-4 text-center space-y-12">
         <div className="space-y-6">
