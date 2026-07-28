@@ -12,19 +12,32 @@ async function startServer() {
 
   app.use(express.json({ limit: "50mb" }));
 
-  // Initialize Gemini
-  const ai = new GoogleGenAI({
-    apiKey: process.env.GEMINI_API_KEY,
-    httpOptions: {
-      headers: {
-        'User-Agent': 'aistudio-build',
-      }
+  // Helper to initialize Gemini with API key rotation
+  const getGeminiAi = () => {
+    const keysString = process.env.GEMINI_API_KEYS || process.env.GEMINI_API_KEY || "";
+    const keys = keysString.split(',').map(k => k.trim()).filter(k => k.length > 0);
+    
+    if (keys.length === 0) {
+      throw new Error("GEMINI_API_KEY or GEMINI_API_KEYS is missing");
     }
-  });
+    
+    // Pick a random key for rotation to avoid rate limits
+    const randomKey = keys[Math.floor(Math.random() * keys.length)];
+    
+    return new GoogleGenAI({
+      apiKey: randomKey,
+      httpOptions: {
+        headers: {
+          'User-Agent': 'aistudio-build',
+        }
+      }
+    });
+  };
 
   // API Route for AI Car Assessment
   app.post("/api/gemini/assess-car", async (req, res) => {
     try {
+      const ai = getGeminiAi();
       const { adDetails, messages, role, userMessage } = req.body;
       
       const systemInstruction = `أنت خبير جزائري في تقييم السيارات. اسمك "الخبير الآلي". مهمتك هي مساعدة البائع والمشتري في الوصول إلى سعر عادل أو تقييم حالة السيارة بناءً على المعلومات المقدمة لك. 
