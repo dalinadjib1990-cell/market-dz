@@ -22,12 +22,12 @@ export default function Hero() {
     <div className="relative min-h-[600px] md:h-[700px] flex items-center justify-center overflow-hidden">
       {/* Background Image of Dark Car with Glowing Lights */}
       <div 
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-60"
-        style={{ backgroundImage: "url('https://images.unsplash.com/photo-1503376713197-2bc158023192?auto=format&fit=crop&q=80')" }}
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-80"
+        style={{ backgroundImage: "url('https://images.unsplash.com/photo-1580273916550-e323be2ae537?auto=format&fit=crop&q=80')" }}
       ></div>
 
       {/* Gradient overlays to ensure text readability */}
-      <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/70 to-[#0a0a0a]/30"></div>
+      <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/50 to-transparent"></div>
       <div className="absolute inset-0 bg-gradient-to-br from-brand-green/20 via-transparent to-brand-red/10 mix-blend-color"></div>
       
       {/* Animated Background Elements */}
