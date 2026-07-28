@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, MapPin, Car, Star, PlusSquare } from 'lucide-react';
+import { Search, MapPin, Car, Star, PlusSquare, Activity } from 'lucide-react';
 import { BRANDS, WILAYAS } from '../constants/data';
 
 export default function Hero() {
@@ -41,14 +41,23 @@ export default function Hero() {
           <p className="text-xl md:text-2xl text-white/60 max-w-3xl mx-auto font-medium leading-relaxed">
             اكتشف آلاف العروض يومياً. بيع وشراء السيارات أصبح أسهل، أسرع، وأكثر أماناً مع <span className="text-white font-bold">Market Auto DZ</span>.
           </p>
-          <div className="pt-4">
+          <div className="pt-4 flex flex-col md:flex-row items-center justify-center gap-4">
             <button 
               onClick={() => navigate('/post')}
-              className="btn-primary !py-4 !px-10 text-xl shadow-[0_0_30px_rgba(0,102,51,0.3)] hover:scale-105 transition-all flex items-center gap-3 mx-auto"
+              className="btn-primary !py-4 !px-8 text-xl shadow-[0_0_30px_rgba(0,102,51,0.3)] hover:scale-105 transition-all flex items-center gap-3"
             >
               <PlusSquare size={24} />
               انشر إعلانك الآن مجاناً
             </button>
+            <a 
+              href="https://chat-gpt-emploi.vercel.app/?fbclid=IwcGRvZgNleHRuA2FlbQIxMQBzcnRjBmFwcF9pZA8yNzUyNTQ2OTI1OTgyNzkAAR6hFdfEel-xLQZmdTOSDcD7SM1700ErYvuHdG75jZf3HaCgN15frINNGicFJQ_aem_wFQP2v-eI0txFtI_BFu_Bg"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-secondary !bg-cyan-500/10 !border-cyan-500/30 !text-cyan-400 !py-4 !px-8 text-lg shadow-[0_0_30px_rgba(34,211,238,0.2)] hover:scale-105 hover:bg-cyan-500/20 transition-all flex items-center gap-3 backdrop-blur-md"
+            >
+              <Activity size={24} className="animate-pulse drop-shadow-[0_0_8px_rgba(34,211,238,0.8)]" />
+              تشخيص سيارتي الذكي
+            </a>
           </div>
         </div>
 
