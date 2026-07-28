@@ -14,7 +14,7 @@ async function startServer() {
 
   // Helper to get all available Gemini keys
   const getGeminiKeys = () => {
-    const keysString = process.env.GEMINI_API_KEYS || process.env.GEMINI_API_KEY || "";
+    const keysString = process.env.GEMINI_API_KEYS || process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEYS || process.env.VITE_GEMINI_API_KEY || "";
     const keys = keysString.split(',').map(k => k.trim()).filter(k => k.length > 0);
     
     if (keys.length === 0) {
