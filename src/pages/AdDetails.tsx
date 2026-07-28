@@ -139,24 +139,31 @@ export default function AdDetails() {
         })
       });
 
-      if (!response.ok) throw new Error('فشل التقييم');
+      if (!response.ok) {
+        let errMsg = 'فشل التقييم';
+        try {
+          const errData = await response.json();
+          if (errData.error) errMsg = errData.error;
+        } catch(e) {}
+        throw new Error(errMsg);
+      }
       const data = await response.json();
       
       // We can display it in a toast or standard alert, or modal. 
       // For now, let's use toast.success with longer duration and large text.
       toast.success(
         <div className="flex flex-col gap-2 max-w-sm">
-          <div className="flex items-center gap-2 font-bold text-indigo-700">
+          <div className="flex items-center gap-2 font-bold text-white">
             <Bot size={16} />
             <span>رأي الخبير الآلي</span>
           </div>
-          <p className="text-sm text-emerald-950 leading-relaxed whitespace-pre-wrap">{data.reply}</p>
+          <p className="text-sm text-white/90 leading-relaxed whitespace-pre-wrap">{data.reply}</p>
         </div>,
-        { id: loadingToast, duration: 20000 }
+        { id: loadingToast, duration: 20000, style: { background: '#10b981', border: 'none' } }
       );
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      toast.error('حدث خطأ أثناء الاتصال بالخبير الآلي', { id: loadingToast });
+      toast.error(error.message || 'حدث خطأ أثناء الاتصال بالخبير الآلي', { id: loadingToast });
     } finally {
       setAssessingCar(false);
     }

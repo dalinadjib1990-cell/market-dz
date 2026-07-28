@@ -1,5 +1,7 @@
 import { GoogleGenAI } from "@google/genai";
 
+export const maxDuration = 60; // Increase Vercel timeout to 60s (works if they have Pro)
+
 export default async function handler(req: any, res: any) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
@@ -10,7 +12,7 @@ export default async function handler(req: any, res: any) {
     const keys = keysString.split(',').map(k => k.trim()).filter(k => k.length > 0);
     
     if (keys.length === 0) {
-      throw new Error("GEMINI_API_KEY or GEMINI_API_KEYS is missing");
+      return res.status(500).json({ error: "لم يتم العثور على مفاتيح API. يرجى التأكد من إضافة GEMINI_API_KEYS في Vercel." });
     }
 
     let lastError = null;
@@ -43,7 +45,10 @@ ${userMessage}`;
 
     const shuffledKeys = [...keys].sort(() => Math.random() - 0.5);
 
-    for (let i = 0; i < shuffledKeys.length; i++) {
+    // Limit to trying at most 3 keys to avoid Vercel timeout (10s on hobby)
+    const maxTries = Math.min(shuffledKeys.length, 3);
+
+    for (let i = 0; i < maxTries; i++) {
       try {
         const ai = new GoogleGenAI({
           apiKey: shuffledKeys[i],
@@ -55,7 +60,7 @@ ${userMessage}`;
         });
 
         const response = await ai.models.generateContent({
-          model: "gemini-2.5-flash",
+          model: "gemini-1.5-flash",
           contents: contents,
           config: {
             systemInstruction: systemInstruction,
@@ -63,16 +68,16 @@ ${userMessage}`;
           },
         });
 
-        return res.json({ reply: response.text });
+        return res.status(200).json({ reply: response.text });
       } catch (error: any) {
         console.error(`Error with key index ${i}:`, error.message);
         lastError = error;
       }
     }
 
-    throw lastError || new Error("جميع مفاتيح API فشلت");
-  } catch (error) {
+    return res.status(500).json({ error: `جميع المفاتيح فشلت. الخطأ الأخير: ${lastError?.message || 'مجهول'}` });
+  } catch (error: any) {
     console.error("Final Error from Gemini:", error);
-    res.status(500).json({ error: "حدث خطأ أثناء تقييم السيارة. الرجاء المحاولة مرة أخرى." });
+    return res.status(500).json({ error: `حدث خطأ أثناء تقييم السيارة: ${error.message}` });
   }
 }

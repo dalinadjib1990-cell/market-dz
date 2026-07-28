@@ -300,7 +300,14 @@ export default function Messages() {
         })
       });
 
-      if (!response.ok) throw new Error('فشل التقييم');
+      if (!response.ok) {
+        let errMsg = 'فشل التقييم';
+        try {
+          const errData = await response.json();
+          if (errData.error) errMsg = errData.error;
+        } catch(e) {}
+        throw new Error(errMsg);
+      }
       const data = await response.json();
       
       await addDoc(collection(db, 'messages'), {
@@ -322,9 +329,9 @@ export default function Messages() {
       
       await setDoc(chatRef, updateData, { merge: true });
       toast.success('تم إضافة تقييم الخبير', { id: loadingToast });
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      toast.error('حدث خطأ أثناء الاتصال بالخبير الآلي', { id: loadingToast });
+      toast.error(error.message || 'حدث خطأ أثناء الاتصال بالخبير الآلي', { id: loadingToast });
     } finally {
       setAssessingCar(false);
     }
@@ -523,14 +530,21 @@ export default function Messages() {
                           })
                         });
                   
-                        if (!response.ok) throw new Error('فشل التقييم');
+                        if (!response.ok) {
+                          let errMsg = 'فشل التقييم';
+                          try {
+                            const errData = await response.json();
+                            if (errData.error) errMsg = errData.error;
+                          } catch(e) {}
+                          throw new Error(errMsg);
+                        }
                         const data = await response.json();
                         
                         await handleSendMessage(undefined, data.reply);
                         toast.success('تم إرسال رأي الخبير بنجاح', { id: loadingToast });
-                      } catch (error) {
+                      } catch (error: any) {
                         console.error(error);
-                        toast.error('حدث خطأ أثناء الاتصال بالخبير الآلي', { id: loadingToast });
+                        toast.error(error.message || 'حدث خطأ أثناء الاتصال بالخبير الآلي', { id: loadingToast });
                       }
                     }}
                     className="p-2 hover:bg-indigo-500/10 hover:text-indigo-400 rounded-lg transition-colors text-indigo-500 flex items-center gap-2"
