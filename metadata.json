@@ -1,5 +1,6 @@
 {
   "name": "Market Auto DZ",
   "description": "المنصة الجزائرية الأولى لبيع وشراء السيارات باحترافية وسهولة.",
-  "requestFramePermissions": ["camera"]
+  "requestFramePermissions": ["camera"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

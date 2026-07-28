@@ -22,17 +22,17 @@ export default function Hero() {
     <div className="relative min-h-[600px] md:h-[700px] flex items-center justify-center overflow-hidden">
       {/* Background Image of Dark Car with Glowing Lights */}
       <div 
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-80"
-        style={{ backgroundImage: "url('https://images.unsplash.com/photo-1580273916550-e323be2ae537?auto=format&fit=crop&q=80')" }}
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-all duration-1000 scale-105"
+        style={{ backgroundImage: "url('https://images.unsplash.com/photo-1583121274602-3e2820c69888?auto=format&fit=crop&q=80')" }}
       ></div>
 
-      {/* Gradient overlays to ensure text readability */}
-      <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/50 to-transparent"></div>
-      <div className="absolute inset-0 bg-gradient-to-br from-brand-green/20 via-transparent to-brand-red/10 mix-blend-color"></div>
+      {/* Gradient overlays designed to keep the car's headlights visible while darkening the text area */}
+      <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/40 to-[#0a0a0a]"></div>
+      <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-transparent to-black/90"></div>
       
-      {/* Animated Background Elements */}
-      <div className="absolute top-1/4 left-1/4 w-[400px] h-[400px] bg-brand-green/20 rounded-full blur-[120px] animate-pulse"></div>
-      <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-cyan-500/10 rounded-full blur-[120px] animate-pulse delay-1000"></div>
+      {/* Animated Glowing Orbs to simulate headlights/mood */}
+      <div className="absolute top-1/3 left-1/4 w-[300px] h-[300px] bg-indigo-500/10 rounded-full blur-[100px] animate-pulse"></div>
+      <div className="absolute top-1/3 right-1/4 w-[300px] h-[300px] bg-red-500/10 rounded-full blur-[100px] animate-pulse delay-700"></div>
 
       <div className="relative z-10 max-w-5xl w-full px-4 text-center space-y-12">
         <div className="space-y-6">

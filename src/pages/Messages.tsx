@@ -5,7 +5,7 @@ import { db } from '../lib/firebase';
 import { useAuth } from '../hooks/useAuth';
 import { Chat, Message } from '../types';
 import { handleFirestoreError, OperationType } from '../lib/firestore-errors';
-import { Send, User, Search, MoreVertical, Phone, MessageSquare, Volume2, VolumeX, ArrowRight, CheckCircle2, Image as ImageIcon, Trash2, Edit2, X, Loader2 } from 'lucide-react';
+import { Send, User, Search, MoreVertical, Phone, MessageSquare, Volume2, VolumeX, ArrowRight, CheckCircle2, Image as ImageIcon, Trash2, Edit2, X, Loader2, Bot } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '../lib/utils';
 import { useNavigate } from 'react-router-dom';
@@ -25,6 +25,7 @@ export default function Messages() {
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
   const [editText, setEditText] = useState('');
   const [uploading, setUploading] = useState(false);
+  const [assessingCar, setAssessingCar] = useState(false);
   const messagesEndRef = React.useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
@@ -278,6 +279,57 @@ export default function Messages() {
     }
   };
 
+  const handleAIAssessment = async () => {
+    if (!activeAd || !activeChat || !user) {
+      toast.error('لا يمكن تقييم السيارة الآن');
+      return;
+    }
+    setAssessingCar(true);
+    const loadingToast = toast.loading('الخبير الآلي يحلل السيارة والسوق...');
+    try {
+      const isBuyer = user.uid === activeChat.buyerId;
+      const role = isBuyer ? 'buyer' : 'seller';
+      
+      const response = await fetch('/api/gemini/assess-car', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          adDetails: activeAd,
+          role,
+          userMessage: 'أعطنا رأيك كخبير محايد في هذه السيارة وهذا السعر بناءً على خبرتك في السوق الجزائري، وحدد سعراً عادلاً للبائع والمشتري.',
+        })
+      });
+
+      if (!response.ok) throw new Error('فشل التقييم');
+      const data = await response.json();
+      
+      await addDoc(collection(db, 'messages'), {
+        chatId: activeChat.id,
+        senderId: 'AI_EXPERT',
+        text: data.reply,
+        createdAt: serverTimestamp(),
+        read: false,
+      });
+
+      const chatRef = doc(db, 'chats', activeChat.id);
+      const otherUid = activeChat.participants?.find(id => id !== user.uid);
+      const updateData: any = {
+        lastMessage: '🤖 تقييم الخبير الآلي',
+        lastSenderId: 'AI_EXPERT',
+        updatedAt: serverTimestamp(),
+      };
+      if (otherUid) updateData[`unreadCount.${otherUid}`] = (activeChat.unreadCount?.[otherUid] || 0) + 1;
+      
+      await setDoc(chatRef, updateData, { merge: true });
+      toast.success('تم إضافة تقييم الخبير', { id: loadingToast });
+    } catch (error) {
+      console.error(error);
+      toast.error('حدث خطأ أثناء الاتصال بالخبير الآلي', { id: loadingToast });
+    } finally {
+      setAssessingCar(false);
+    }
+  };
+
   const QUICK_REPLIES = [
     'كم السعر؟',
     'واش فيها معاود؟ (الطلاء)',
@@ -463,31 +515,44 @@ export default function Messages() {
               </div>
 
               {/* Ad Banner inside Chat */}
-              <div className="bg-white/5 border-b border-white/10 p-3 flex items-center gap-4 hover:bg-white/10 transition-colors cursor-pointer" onClick={() => navigate(`/ad/${activeChat.adId}`)}>
-                {(activeChat.adImage || activeAd?.images?.[0]) ? (
-                  <img src={activeChat.adImage || activeAd?.images?.[0]} alt={activeChat.adTitle} className="w-16 h-12 rounded-lg object-cover" />
-                ) : (
-                  <div className="w-16 h-12 rounded-lg bg-black/50 flex items-center justify-center">
-                     <ImageIcon size={20} className="text-white/20" />
-                  </div>
-                )}
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs font-bold truncate text-brand-green">{activeChat.adTitle || activeAd?.title}</p>
-                  <div className="flex items-center gap-2 mt-1 flex-wrap">
-                    <span className="text-xs text-emerald-400 font-black">
-                      {(activeChat.adPrice || activeAd?.price)?.toLocaleString() || '---'} دج
-                    </span>
-                    {(activeChat.adSamouni || activeAd?.samouni) && (
-                      <>
-                        <span className="text-[10px] text-white/40">|</span>
-                        <span className="text-xs text-red-500 font-black">
-                          سوموني: {(activeChat.adSamouni || activeAd?.samouni).toLocaleString()}
-                        </span>
-                      </>
-                    )}
+              <div className="bg-white/5 border-b border-white/10 p-3 flex items-center justify-between gap-4">
+                <div 
+                  className="flex items-center gap-4 hover:opacity-80 transition-opacity cursor-pointer flex-1 min-w-0" 
+                  onClick={() => navigate(`/ad/${activeChat.adId}`)}
+                >
+                  {(activeChat.adImage || activeAd?.images?.[0]) ? (
+                    <img src={activeChat.adImage || activeAd?.images?.[0]} alt={activeChat.adTitle} className="w-16 h-12 rounded-lg object-cover" />
+                  ) : (
+                    <div className="w-16 h-12 rounded-lg bg-black/50 flex items-center justify-center">
+                       <ImageIcon size={20} className="text-white/20" />
+                    </div>
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-bold truncate text-brand-green">{activeChat.adTitle || activeAd?.title}</p>
+                    <div className="flex items-center gap-2 mt-1 flex-wrap">
+                      <span className="text-xs text-emerald-400 font-black">
+                        {(activeChat.adPrice || activeAd?.price)?.toLocaleString() || '---'} دج
+                      </span>
+                      {(activeChat.adSamouni || activeAd?.samouni) && (
+                        <>
+                          <span className="text-[10px] text-white/40">|</span>
+                          <span className="text-xs text-red-500 font-black">
+                            سوموني: {(activeChat.adSamouni || activeAd?.samouni).toLocaleString()}
+                          </span>
+                        </>
+                      )}
+                    </div>
                   </div>
                 </div>
-                <ArrowRight size={16} className="text-white/40 rotate-180" />
+                <button
+                  onClick={handleAIAssessment}
+                  disabled={assessingCar}
+                  className="flex items-center gap-2 bg-gradient-to-l from-indigo-600 to-indigo-900 text-white px-3 py-1.5 rounded-lg text-xs font-bold hover:shadow-[0_0_15px_rgba(79,70,229,0.5)] transition-all shrink-0 active:scale-95 disabled:opacity-50 disabled:pointer-events-none"
+                  title="اطلب رأي الخبير الآلي حول السعر والسيارة"
+                >
+                  {assessingCar ? <Loader2 size={14} className="animate-spin" /> : <Bot size={14} />}
+                  <span className="hidden sm:inline">تقييم الذكاء الاصطناعي</span>
+                </button>
               </div>
 
               <div className="flex-1 overflow-y-auto p-6 space-y-4 no-scrollbar">
@@ -505,14 +570,22 @@ export default function Messages() {
                 {messages.map(msg => (
                   <div key={msg.id} className={cn(
                     "flex group",
-                    msg.senderId === user.uid ? "justify-start" : "justify-end"
+                    msg.senderId === 'AI_EXPERT' ? "justify-center" : (msg.senderId === user.uid ? "justify-start" : "justify-end")
                   )}>
                     <div className={cn(
-                      "max-w-[75%] p-4 rounded-2xl text-sm relative shadow-lg transition-all hover:scale-[1.01]",
-                      msg.senderId === user.uid 
-                        ? "bg-gradient-to-br from-brand-green to-emerald-900 text-white rounded-tr-none shadow-brand-green/10" 
-                        : "bg-gradient-to-br from-white/10 to-white/5 text-white rounded-tl-none border border-white/10 shadow-black/20"
+                      "max-w-[85%] p-4 rounded-2xl text-sm relative shadow-lg transition-all hover:scale-[1.01] whitespace-pre-wrap",
+                      msg.senderId === 'AI_EXPERT' 
+                        ? "bg-gradient-to-br from-indigo-900/40 to-blue-900/20 text-white rounded-2xl border border-indigo-500/30 w-full" 
+                        : (msg.senderId === user.uid 
+                          ? "bg-gradient-to-br from-brand-green to-emerald-900 text-white rounded-tr-none shadow-brand-green/10" 
+                          : "bg-gradient-to-br from-white/10 to-white/5 text-white rounded-tl-none border border-white/10 shadow-black/20")
                     )}>
+                      {msg.senderId === 'AI_EXPERT' && (
+                        <div className="flex items-center gap-2 mb-2 text-indigo-400 font-bold border-b border-indigo-500/20 pb-2">
+                          <Bot size={16} />
+                          <span>الخبير الآلي (Market Auto DZ)</span>
+                        </div>
+                      )}
                       {editingMessageId === msg.id ? (
                         <div className="space-y-2 min-w-[200px]">
                           <input 

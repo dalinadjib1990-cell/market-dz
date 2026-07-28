@@ -9,7 +9,7 @@ import {
   MapPin, Calendar, Gauge, CheckCircle2, Phone, MessageSquare, 
   Share2, Heart, ChevronLeft, ChevronRight, User, Star, ShieldCheck,
   Zap, Info, Trash2, Edit2, Activity, X, Search, Droplets, CheckCircle,
-  AlertTriangle, Thermometer
+  AlertTriangle, Thermometer, Bot, Loader2
 } from 'lucide-react';
 import { cn, generateId } from '../lib/utils';
 import { toast } from 'sonner';
@@ -31,6 +31,7 @@ export default function AdDetails() {
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
   const [editCommentText, setEditCommentText] = useState('');
   const [showZoom, setShowZoom] = useState(false);
+  const [assessingCar, setAssessingCar] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -120,6 +121,44 @@ export default function AdDetails() {
       navigate('/');
     } catch (error) {
       toast.error('فشل حذف الإعلان');
+    }
+  };
+
+  const handleAIAssessment = async () => {
+    if (!ad) return;
+    setAssessingCar(true);
+    const loadingToast = toast.loading('الخبير الآلي يحلل السيارة والسوق...');
+    try {
+      const response = await fetch('/api/gemini/assess-car', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          adDetails: ad,
+          role: 'viewer',
+          userMessage: 'أعطنا رأيك كخبير محايد في هذه السيارة وهذا السعر بناءً على خبرتك في السوق الجزائري، وحدد سعراً عادلاً.',
+        })
+      });
+
+      if (!response.ok) throw new Error('فشل التقييم');
+      const data = await response.json();
+      
+      // We can display it in a toast or standard alert, or modal. 
+      // For now, let's use toast.success with longer duration and large text.
+      toast.success(
+        <div className="flex flex-col gap-2 max-w-sm">
+          <div className="flex items-center gap-2 font-bold text-indigo-400">
+            <Bot size={16} />
+            <span>رأي الخبير الآلي</span>
+          </div>
+          <p className="text-sm text-white/90 leading-relaxed whitespace-pre-wrap">{data.reply}</p>
+        </div>,
+        { id: loadingToast, duration: 20000 }
+      );
+    } catch (error) {
+      console.error(error);
+      toast.error('حدث خطأ أثناء الاتصال بالخبير الآلي', { id: loadingToast });
+    } finally {
+      setAssessingCar(false);
     }
   };
 
@@ -689,6 +728,14 @@ export default function AdDetails() {
               >
                 <MessageSquare size={20} />
                 مراسلة البائع
+              </button>
+              <button 
+                onClick={handleAIAssessment}
+                disabled={assessingCar}
+                className="w-full bg-gradient-to-r from-indigo-600 to-blue-600 text-white font-bold py-3 rounded-xl flex items-center justify-center gap-3 hover:scale-105 active:scale-95 transition-all shadow-[0_0_15px_rgba(79,70,229,0.3)] hover:shadow-[0_0_25px_rgba(79,70,229,0.5)] disabled:opacity-50 disabled:pointer-events-none"
+              >
+                {assessingCar ? <Loader2 size={20} className="animate-spin" /> : <Bot size={20} />}
+                تقييم الخبير الآلي للإعلان
               </button>
             </div>
 
