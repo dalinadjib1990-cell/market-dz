@@ -279,10 +279,11 @@ export default function Messages() {
   };
 
   const QUICK_REPLIES = [
-    'كم السعر النهائي؟',
-    'هل السيارة لا تزال متوفرة؟',
-    'واش هو السوم (آخر عرض)؟',
-    'أين يمكنني رؤية السيارة؟'
+    'كم السعر؟',
+    'واش فيها معاود؟ (الطلاء)',
+    'واش من بلاصة انت؟',
+    'كيفاش حالة المحرك؟',
+    'هل السيارة لا تزال متوفرة؟'
   ];
 
   if (!user) return null;
@@ -381,10 +382,14 @@ export default function Messages() {
                       )}
                     </div>
                   </div>
-                  <div className="flex items-center justify-between gap-2">
-                    <p className="text-[10px] text-brand-green font-bold truncate flex-1">{chat.adTitle}</p>
-                    <div className="flex items-center gap-2 shrink-0">
-                      {chat.adWilaya && <span className="text-[9px] text-white/40 bg-white/5 px-1 rounded">{chat.adWilaya}</span>}
+                  <div className="flex items-center justify-between gap-2 mt-1">
+                    <div className="flex items-center gap-2 overflow-hidden">
+                      {(chat.adImage || activeAd?.images?.[0]) && (
+                        <img src={chat.adImage || activeAd?.images?.[0]} alt="" className="w-8 h-8 rounded-lg object-cover shrink-0" />
+                      )}
+                      <p className="text-[10px] text-brand-green font-bold truncate flex-1">{chat.adTitle}</p>
+                    </div>
+                    <div className="flex flex-col items-end gap-1 shrink-0">
                       {chat.adPrice && <span className="text-[9px] text-emerald-400 font-bold">{chat.adPrice.toLocaleString()} دج</span>}
                       {chat.adSamouni && <span className="text-[9px] text-red-500 font-bold">سوموني: {chat.adSamouni.toLocaleString()}</span>}
                     </div>
@@ -414,7 +419,7 @@ export default function Messages() {
                   >
                     <ArrowRight size={20} />
                   </button>
-                  <div className="w-10 h-10 rounded-xl bg-brand-green/10 flex items-center justify-center overflow-hidden">
+                  <div className="w-10 h-10 rounded-xl bg-brand-green/10 flex items-center justify-center overflow-hidden shrink-0">
                     {(() => {
                       const otherUid = activeChat.participants?.find(id => id !== user.uid);
                       const otherProfile = otherUid ? profiles[otherUid] : null;
@@ -424,7 +429,7 @@ export default function Messages() {
                       return <User size={20} className="text-brand-green" />;
                     })()}
                   </div>
-                  <div className="min-w-0 text-right">
+                  <div className="min-w-0 text-right flex-1">
                     <h3 className="font-bold text-sm truncate">
                       {(() => {
                         const otherUid = activeChat.participants?.find(id => id !== user.uid);
@@ -443,22 +448,6 @@ export default function Messages() {
                         return isBuyer ? 'بائع' : 'مشتري';
                       })()}
                     </h3>
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <p className="text-[10px] text-brand-green font-bold uppercase">{activeChat.adTitle || activeAd?.title}</p>
-                      <span className="text-[9px] text-white/40">|</span>
-                      <span className="text-xs text-emerald-400 font-black">
-                        {(activeChat.adPrice || activeAd?.price)?.toLocaleString() || '---'} دج
-                      </span>
-                      {(activeChat.adSamouni || activeAd?.samouni) && (
-                        <>
-                          <span className="text-[9px] text-white/40">|</span>
-                          <span className="text-xs text-red-500 font-black">
-                            سوموني: {(activeChat.adSamouni || activeAd?.samouni).toLocaleString()}
-                          </span>
-                        </>
-                      )}
-                      <span className="text-[9px] text-white/60">({activeChat.adWilaya || activeAd?.wilaya || '---'})</span>
-                    </div>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
@@ -473,6 +462,34 @@ export default function Messages() {
                 </div>
               </div>
 
+              {/* Ad Banner inside Chat */}
+              <div className="bg-white/5 border-b border-white/10 p-3 flex items-center gap-4 hover:bg-white/10 transition-colors cursor-pointer" onClick={() => navigate(`/ad/${activeChat.adId}`)}>
+                {(activeChat.adImage || activeAd?.images?.[0]) ? (
+                  <img src={activeChat.adImage || activeAd?.images?.[0]} alt={activeChat.adTitle} className="w-16 h-12 rounded-lg object-cover" />
+                ) : (
+                  <div className="w-16 h-12 rounded-lg bg-black/50 flex items-center justify-center">
+                     <ImageIcon size={20} className="text-white/20" />
+                  </div>
+                )}
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-bold truncate text-brand-green">{activeChat.adTitle || activeAd?.title}</p>
+                  <div className="flex items-center gap-2 mt-1 flex-wrap">
+                    <span className="text-xs text-emerald-400 font-black">
+                      {(activeChat.adPrice || activeAd?.price)?.toLocaleString() || '---'} دج
+                    </span>
+                    {(activeChat.adSamouni || activeAd?.samouni) && (
+                      <>
+                        <span className="text-[10px] text-white/40">|</span>
+                        <span className="text-xs text-red-500 font-black">
+                          سوموني: {(activeChat.adSamouni || activeAd?.samouni).toLocaleString()}
+                        </span>
+                      </>
+                    )}
+                  </div>
+                </div>
+                <ArrowRight size={16} className="text-white/40 rotate-180" />
+              </div>
+
               <div className="flex-1 overflow-y-auto p-6 space-y-4 no-scrollbar">
                 {messages.length === 0 && (
                   <div className="flex flex-col items-center justify-center h-full space-y-6">
@@ -481,18 +498,7 @@ export default function Messages() {
                     </div>
                     <div className="text-center space-y-2">
                       <p className="text-white/60 font-bold">ابدأ المحادثة الآن</p>
-                      <p className="text-xs text-white/20">اختر رسالة سريعة للبدء</p>
-                    </div>
-                    <div className="grid grid-cols-1 gap-2 w-full max-w-xs">
-                      {QUICK_REPLIES.map((reply, i) => (
-                        <button
-                          key={i}
-                          onClick={() => handleSendMessage(undefined, reply)}
-                          className="p-3 bg-white/5 hover:bg-brand-green/10 hover:text-brand-green border border-white/10 rounded-xl text-xs font-bold transition-all text-right"
-                        >
-                          {reply}
-                        </button>
-                      ))}
+                      <p className="text-xs text-white/20">استخدم الرسائل السريعة بالأسفل للبدء</p>
                     </div>
                   </div>
                 )}
@@ -548,6 +554,19 @@ export default function Messages() {
                   </div>
                 ))}
                 <div ref={messagesEndRef} />
+              </div>
+
+              {/* Quick Replies always accessible */}
+              <div className="flex gap-2 px-4 py-2 overflow-x-auto no-scrollbar border-t border-white/5 bg-[#0a0a0a]/50">
+                {QUICK_REPLIES.map((reply, i) => (
+                  <button
+                    key={i}
+                    onClick={() => handleSendMessage(undefined, reply)}
+                    className="shrink-0 px-3 py-1.5 bg-white/5 hover:bg-brand-green/10 hover:text-brand-green border border-white/10 rounded-full text-xs font-bold transition-all whitespace-nowrap"
+                  >
+                    {reply}
+                  </button>
+                ))}
               </div>
 
               <form onSubmit={handleSendMessage} className="p-4 md:p-6 border-t border-white/10 flex gap-2 md:gap-4 bg-[#0a0a0a]/80 backdrop-blur-xl sticky bottom-0">

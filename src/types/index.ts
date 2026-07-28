@@ -83,6 +83,7 @@ export interface Chat {
   adPrice?: number;
   adSamouni?: number;
   adWilaya?: string;
+  adImage?: string;
   buyerId?: string;
   sellerId?: string;
   buyerName?: string;

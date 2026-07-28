@@ -177,6 +177,7 @@ export default function AdDetails() {
           adPrice: ad.price,
           adSamouni: ad.samouni || null,
           adWilaya: ad.wilaya,
+          adImage: ad.images[0] || null,
           buyerId: user.uid,
           sellerId: ad.userId,
           buyerName: finalBuyerName,
