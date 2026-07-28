@@ -8,11 +8,26 @@ export default async function handler(req: any, res: any) {
   }
 
   try {
+    let keys: string[] = [];
+    
+    // Check comma-separated lists
     const keysString = process.env.GEMINI_API_KEYS || process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEYS || process.env.VITE_GEMINI_API_KEY || "";
-    const keys = keysString.split(',').map(k => k.trim()).filter(k => k.length > 0);
+    if (keysString) {
+      keys = keys.concat(keysString.split(',').map(k => k.trim()).filter(k => k.length > 0));
+    }
+
+    // Check individual variables like GEMINI_API_KEY_1, GEMINI_API_KEY_2
+    for (const [key, value] of Object.entries(process.env)) {
+      if (key.startsWith('GEMINI_API_KEY_') && typeof value === 'string') {
+        keys.push(value.trim());
+      }
+    }
+
+    // Remove duplicates
+    keys = [...new Set(keys)].filter(k => k.length > 0);
     
     if (keys.length === 0) {
-      return res.status(500).json({ error: "لم يتم العثور على مفاتيح API. يرجى التأكد من إضافة GEMINI_API_KEYS في Vercel." });
+      return res.status(500).json({ error: "لم يتم العثور على مفاتيح API. يرجى التأكد من إضافة GEMINI_API_KEY_1, GEMINI_API_KEY_2 في Vercel." });
     }
 
     let lastError = null;

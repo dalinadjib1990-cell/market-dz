@@ -14,11 +14,26 @@ async function startServer() {
 
   // Helper to get all available Gemini keys
   const getGeminiKeys = () => {
+    let keys: string[] = [];
+    
+    // 1. Check comma-separated lists
     const keysString = process.env.GEMINI_API_KEYS || process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEYS || process.env.VITE_GEMINI_API_KEY || "";
-    const keys = keysString.split(',').map(k => k.trim()).filter(k => k.length > 0);
+    if (keysString) {
+      keys = keys.concat(keysString.split(',').map(k => k.trim()).filter(k => k.length > 0));
+    }
+
+    // 2. Check for individual variables like GEMINI_API_KEY_1, GEMINI_API_KEY_2
+    for (const [key, value] of Object.entries(process.env)) {
+      if (key.startsWith('GEMINI_API_KEY_') && typeof value === 'string') {
+        keys.push(value.trim());
+      }
+    }
+
+    // Remove duplicates
+    keys = [...new Set(keys)].filter(k => k.length > 0);
     
     if (keys.length === 0) {
-      throw new Error("GEMINI_API_KEY or GEMINI_API_KEYS is missing");
+      throw new Error("لم يتم العثور على مفاتيح API. يرجى التأكد من إضافة GEMINI_API_KEY_1, GEMINI_API_KEY_2 في Vercel.");
     }
     return keys;
   };
