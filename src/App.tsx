@@ -12,6 +12,7 @@ import AdDetails from './pages/AdDetails';
 import Profile from './pages/Profile';
 import Messages from './pages/Messages';
 import Admin from './pages/Admin';
+import PrivacyPolicy from './pages/PrivacyPolicy';
 import FloatingChatBubble from './components/FloatingChatBubble';
 import { useAuth } from './hooks/useAuth';
 import { AuthProvider } from './context/AuthContext';
@@ -66,6 +67,7 @@ function AppContent() {
             <Route path="/profile" element={<Profile />} />
             <Route path="/messages" element={<Messages />} />
             <Route path="/admin" element={<Admin />} />
+            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           </Routes>
         </main>
         <FloatingChatBubble />
@@ -94,7 +96,7 @@ function AppContent() {
                 )}
                 <li><Link to="/" className="hover:text-brand-green transition-colors">عن المنصة</Link></li>
                 <li><a href="#" className="hover:text-brand-green transition-colors">شروط الاستخدام</a></li>
-                <li><a href="#" className="hover:text-brand-green transition-colors">سياسة الخصوصية</a></li>
+                <li><Link to="/privacy-policy" className="hover:text-brand-green transition-colors">سياسة الخصوصية</Link></li>
                 <li><a href="#" className="hover:text-brand-green transition-colors">اتصل بنا</a></li>
               </ul>
             </div>
