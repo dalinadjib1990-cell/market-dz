@@ -503,6 +503,42 @@ export default function Messages() {
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
+                  <button 
+                    onClick={async () => {
+                      if (!activeChat || !user) return;
+                      const loadingToast = toast.loading('الخبير الآلي يراجع المحادثة...');
+                      try {
+                        const response = await fetch('/api/gemini/assess-car', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({
+                            adDetails: {
+                              title: activeChat.adTitle || 'غير متوفر',
+                              price: activeChat.adPrice || 0,
+                              samouni: activeChat.adSamouni || 0,
+                              wilaya: activeChat.adWilaya || 'غير متوفر'
+                            },
+                            role: 'viewer',
+                            userMessage: 'أعطنا رأيك كخبير محايد في هذه المحادثة بين البائع والمشتري واقترح سعراً يرضي الطرفين.',
+                          })
+                        });
+                  
+                        if (!response.ok) throw new Error('فشل التقييم');
+                        const data = await response.json();
+                        
+                        await handleSendMessage(undefined, data.reply);
+                        toast.success('تم إرسال رأي الخبير بنجاح', { id: loadingToast });
+                      } catch (error) {
+                        console.error(error);
+                        toast.error('حدث خطأ أثناء الاتصال بالخبير الآلي', { id: loadingToast });
+                      }
+                    }}
+                    className="p-2 hover:bg-indigo-500/10 hover:text-indigo-400 rounded-lg transition-colors text-indigo-500 flex items-center gap-2"
+                    title="طلب رأي الخبير الآلي"
+                  >
+                    <Bot size={18} />
+                    <span className="text-xs font-bold hidden md:inline">الخبير الآلي</span>
+                  </button>
                   <button className="p-2 hover:bg-white/5 rounded-lg transition-colors text-white/40"><Phone size={18} /></button>
                   <button 
                     onClick={() => setActiveChat(null)}
@@ -656,10 +692,11 @@ export default function Messages() {
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}
                     className="w-full bg-white/5 border border-white/10 rounded-xl md:rounded-2xl py-2 md:py-3 px-4 md:px-6 text-sm outline-none focus:border-brand-green/50 focus:bg-white/10 transition-all"
+                    dir="auto"
                   />
                 </div>
-                <button type="submit" className="bg-brand-green text-white p-2 md:p-3 rounded-xl md:rounded-2xl hover:scale-105 active:scale-95 transition-all shadow-lg shadow-brand-green/20">
-                  <Send size={18} />
+                <button type="submit" disabled={!newMessage.trim() && !uploading} className="shrink-0 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center bg-brand-green text-white rounded-xl md:rounded-2xl hover:scale-105 active:scale-95 transition-all shadow-lg shadow-brand-green/20 disabled:opacity-50 disabled:pointer-events-none">
+                  <Send size={18} className="rtl:-scale-x-100" />
                 </button>
               </form>
             </div>
