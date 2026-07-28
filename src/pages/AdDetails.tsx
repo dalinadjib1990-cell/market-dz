@@ -146,11 +146,11 @@ export default function AdDetails() {
       // For now, let's use toast.success with longer duration and large text.
       toast.success(
         <div className="flex flex-col gap-2 max-w-sm">
-          <div className="flex items-center gap-2 font-bold text-indigo-400">
+          <div className="flex items-center gap-2 font-bold text-indigo-700">
             <Bot size={16} />
             <span>رأي الخبير الآلي</span>
           </div>
-          <p className="text-sm text-white/90 leading-relaxed whitespace-pre-wrap">{data.reply}</p>
+          <p className="text-sm text-emerald-950 leading-relaxed whitespace-pre-wrap">{data.reply}</p>
         </div>,
         { id: loadingToast, duration: 20000 }
       );
