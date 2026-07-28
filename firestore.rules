@@ -64,8 +64,8 @@ service cloud.firestore {
     }
 
     function isValidMessage(data) {
-      return data.senderId == request.auth.uid
-        && data.text is string && data.text.size() <= 1000
+      return (data.senderId == request.auth.uid || data.senderId == 'AI_EXPERT')
+        && data.text is string && data.text.size() <= 2000
         && data.chatId is string;
     }
 
