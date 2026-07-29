@@ -41,14 +41,19 @@ export default function MarketAnalysisPopup({ isOpen, onClose, ad }: MarketAnaly
     setLoading(true);
     try {
       // Fetch similar ads
-      let q;
-      if (ad) {
-        q = query(collection(db, 'ads'), where('brand', '==', ad.brand));
-      } else {
-        q = query(collection(db, 'ads'));
+      let similarAds = [];
+      try {
+        let q;
+        if (ad) {
+          q = query(collection(db, 'ads'), where('brand', '==', ad.brand));
+        } else {
+          q = query(collection(db, 'ads'));
+        }
+        const snapshot = await getDocs(q);
+        similarAds = snapshot.docs.map(doc => doc.data()).slice(0, 10);
+      } catch (err) {
+        console.error('Failed to fetch similar ads', err);
       }
-      const snapshot = await getDocs(q);
-      const similarAds = snapshot.docs.map(doc => doc.data()).slice(0, 10);
 
       const response = await fetch('/api/gemini/market-analysis', {
         method: 'POST',
@@ -60,17 +65,18 @@ export default function MarketAnalysisPopup({ isOpen, onClose, ad }: MarketAnaly
       });
 
       if (!response.ok) {
-        throw new Error('Failed to fetch market analysis');
-      }
-
-      if (!response.ok) {
-        throw new Error('فشل في جلب البيانات');
+        let errMsg = 'فشل في جلب البيانات';
+        try {
+          const errData = await response.json();
+          if (errData.error) errMsg = errData.error;
+        } catch (e) {}
+        throw new Error(errMsg);
       }
       const result = await response.json();
       setData(result);
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      toast.error('حدث خطأ أثناء تحميل بيانات السوق');
+      toast.error(error.message || 'حدث خطأ أثناء تحميل بيانات السوق');
       onClose();
     } finally {
       setLoading(false);

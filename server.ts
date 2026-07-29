@@ -1,3 +1,4 @@
+import fs from 'fs';
 import express from "express";
 import path from "path";
 import { createServer as createViteServer } from "vite";
@@ -60,7 +61,7 @@ async function startServer() {
       1. **نظرة عامة**: رأيك السريع.
       2. **تحليل الصور وتبرير الحكم**: إذا تم إرفاق صور مع الطلب، قم بتحليلها بدقة لتقييم حالة الهيكل (الصبيغة، الصدمات)، الصالون، العجلات، والمحرك إن وجد. **وضح سبب حكمك بشكل دقيق** (مثلاً: "لاحظت اختلاف لون الرفرف الأمامي"، أو "وجود فجوة غير طبيعية بين الباب والهيكل"، أو "آثار فك في براغي غطاء المحرك"). لا تكتفِ بإعطاء النتيجة النهائية فقط، بل اشرح للمستخدم ما رأيته بالضبط في الصور أو استنتجته من الوصف لتبني الثقة.
       3. **تحليل حالة السيارة ومصاريف الترقيع**: توقع المصاريف المحتملة في المحرك، الهيكل، نظام التعليق، والكهرباء بناءً على وصف الإعلان والصور وسنة الصنع والممشى. **مهم جداً**: استخدم أداة بحث جوجل (googleSearch) للبحث عن أحدث أسعار قطع الغيار والمحركات في السوق الجزائري، (لاسيما في الـ Casse)، فمثلاً محرك ياريس 1.3 قد يصل سعره إلى 44 مليون سنتيم (440,000 دج) أو أكثر. أعطِ تقديرات واقعية ودقيقة جداً تعكس الأسعار الحالية للسوق لتجنب تضليل المشتري.
-      4. **تحليل السعر**: قارن السعر المطلوب بحالة السوق الحالية، واقترح مجالاً سعرياً عادلاً.
+      4. **تحليل السعر**: قارن السعر المطلوب بحالة السوق الحالية، واقترح مجالاً سعرياً عادلاً. **تحذير صارم جداً**: سوق السيارات في الجزائر يعيش حالة تضخم جنونية غير مسبوقة! سيارات قديمة مثل كليو كومبيس 2007 تباع بأسعار تتراوح بين 100 إلى 140 مليون سنتيم وهذا هو **السعر العادي والطبيعي** في السوق الجزائري حالياً. يُمنع منعاً باتاً أن تقول عن سعر 100 مليون أو 120 مليون لسيارة كليو 2007 أنه "سعر خيالي" أو "غير منطقي". يجب أن تكون تحليلاتك واقعية ومُحدثة (Mise à jour) ومبنية على هذا التضخم. إذا كان السعر يتماشى مع هذا التضخم، اعتبره سعراً عادياً في السوق ولا تنتقده لمجرد أنه يبدو مرتفعاً مقارنة بالماضي.
       5. **نصيحة أخيرة للمشتري**: نصيحة صريحة ومباشرة عما إذا كان يستحق شراء السيارة أم لا. راعِ ظروف المشتري ذي الميزانية المحدودة (الزوالي)، وانصحه بواقعية إذا كانت السيارة تناسب ميزانيته أو ستتعبه بمصاريف الصيانة والترقيع.
 
       لتقديم رسم بياني لتوقعات مصاريف الإصلاح والتجديد (بالدينار الجزائري)، قم دائماً بتضمين كتلة JSON في نهاية ردك بالتنسيق التالي بالضبط (يجب أن يكون بالدينار الجزائري وليس بملايين السنتيمات في الرسم البياني):
@@ -119,7 +120,7 @@ ${userMessage}
 
       // Try keys randomly or sequentially until one succeeds
       const shuffledKeys = [...keys].sort(() => Math.random() - 0.5);
-      const modelsToTry = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash"];
+      const modelsToTry = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash-8b"];
 
       let isRateLimited = false;
 
@@ -200,7 +201,7 @@ ${userMessage}
       }
       ملاحظة: السعر في trendData، fairPrice، و regionalComparison يجب أن يكون بالدينار الجزائري (دج).
       أنت متصل بالإنترنت الآن! استخدم أداة البحث في جوجل (googleSearch tool) للبحث في المواقع الجزائرية لمعرفة أحدث الأسعار لسيارات مماثلة في السوق الحقيقي وتوفير بيانات دقيقة ومحدثة اليوم.
-            إذا لم تتوفر لديك بيانات حقيقية كافية، استخدم خبرتك في السوق الجزائري لتقدير هذه الأرقام بشكل منطقي ومقنع بناءً على السيارة وسنة الصنع والمسافة المقطوعة.`;
+            إذا لم تتوفر لديك بيانات حقيقية كافية، استخدم خبرتك في السوق الجزائري لتقدير هذه الأرقام بشكل منطقي ومقنع. **تنبيه صارم**: الأسعار في الجزائر مرتفعة بشكل جنوني (مثلاً كليو كومبيس 2007 يتراوح سعرها بين 100 و 140 مليون سنتيم). إياك أن تصنف هذه الأسعار على أنها "غير منطقية" أو "خيالية"! هذا هو الواقع الحالي للسوق (Mise à jour). تقييماتك للمجال السعري يجب أن تتبنى هذه الأسعار المتضخمة كمعيار طبيعي وعادي جداً.`;
 
       let textContent = adDetails.title ? `معلومات الإعلان الحالي:
 العنوان: ${adDetails.title || 'غير متوفر'}
@@ -218,7 +219,7 @@ ${JSON.stringify(marketData || [])}`;
 
       // Try keys randomly or sequentially until one succeeds
       const shuffledKeys = [...keys].sort(() => Math.random() - 0.5);
-      const modelsToTry = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash"];
+      const modelsToTry = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash-8b"];
 
       let isRateLimited = false;
       for (let i = 0; i < shuffledKeys.length; i++) {
@@ -243,18 +244,18 @@ ${JSON.stringify(marketData || [])}`;
               },
             });
 
-            let responseText = response.text || '';
+let responseText = response.text || '';
             const jsonMatch = responseText.match(/\{.*\}/s);
             if (jsonMatch) {
               responseText = jsonMatch[0];
             } else {
               responseText = responseText.replace(/```(json)?/g, '').trim();
             }
-
             return res.json(JSON.parse(responseText));
 
           } catch (error: any) {
-            console.error(`Error with key index ${i} using model ${modelName} in market-analysis:`, error.message);
+            fs.appendFileSync('gemini_error.log', `Error with key index ${i} using model ${modelName} in market-analysis: ${error.message}\n`);
+console.error(`Error with key index ${i} using model ${modelName} in market-analysis:`, error.message);
             lastError = error;
             if (error?.message?.includes('429') || error?.message?.includes('Quota exceeded') || error?.status === 'RESOURCE_EXHAUSTED') {
                 isRateLimited = true;
