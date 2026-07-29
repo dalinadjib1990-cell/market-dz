@@ -200,7 +200,7 @@ ${userMessage}
       ملاحظة: السعر في trendData، fairPrice، و regionalComparison يجب أن يكون بالدينار الجزائري (دج).
       إذا لم تتوفر لديك بيانات حقيقية كافية، استخدم خبرتك في السوق الجزائري لتقدير هذه الأرقام بشكل منطقي ومقنع بناءً على السيارة وسنة الصنع والمسافة المقطوعة.`;
 
-      let textContent = `معلومات الإعلان الحالي:
+      let textContent = adDetails.title ? `معلومات الإعلان الحالي:
 العنوان: ${adDetails.title || 'غير متوفر'}
 السعر: ${adDetails.price ? adDetails.price + ' دج' : 'غير متوفر'}
 سوموني (أعلى عرض): ${adDetails.samouni ? adDetails.samouni + ' دج' : 'غير متوفر'}
@@ -210,6 +210,8 @@ ${userMessage}
 المسافة المقطوعة: ${adDetails.mileage ? adDetails.mileage + ' كم' : 'غير متوفر'}
 
 بيانات السوق المتاحة (سيارات مشابهة):
+${JSON.stringify(marketData || [])}` : `طلب تحليل عام للسوق الجزائري للسيارات، يرجى تقديم نظرة عامة عن الأسعار، أكثر السيارات مبيعاً والتوجه الحالي للسوق.
+بيانات السوق الحالية:
 ${JSON.stringify(marketData || [])}`;
 
       // Try keys randomly or sequentially until one succeeds

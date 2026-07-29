@@ -757,13 +757,6 @@ export default function AdDetails() {
                 {assessingCar ? <Loader2 size={20} className="animate-spin" /> : <Bot size={20} />}
                 تقييم الخبير الآلي للإعلان
               </button>
-              <button 
-                onClick={() => setShowMarketAnalysis(true)}
-                className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold py-3 rounded-xl flex items-center justify-center gap-3 hover:scale-105 active:scale-95 transition-all shadow-[0_0_15px_rgba(16,185,129,0.3)] hover:shadow-[0_0_25px_rgba(16,185,129,0.5)]"
-              >
-                <LineChartIcon size={20} />
-                تحليل السوق
-              </button>
             </div>
 
             <div className="pt-8 border-t border-white/5 space-y-4">

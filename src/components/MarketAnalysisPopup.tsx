@@ -11,7 +11,7 @@ import { cn } from '../lib/utils';
 interface MarketAnalysisPopupProps {
   isOpen: boolean;
   onClose: () => void;
-  ad: Ad;
+  ad?: Ad;
 }
 
 interface MarketData {
@@ -41,7 +41,12 @@ export default function MarketAnalysisPopup({ isOpen, onClose, ad }: MarketAnaly
     setLoading(true);
     try {
       // Fetch similar ads
-      const q = query(collection(db, 'ads'), where('brand', '==', ad.brand));
+      let q;
+      if (ad) {
+        q = query(collection(db, 'ads'), where('brand', '==', ad.brand));
+      } else {
+        q = query(collection(db, 'ads'));
+      }
       const snapshot = await getDocs(q);
       const similarAds = snapshot.docs.map(doc => doc.data()).slice(0, 10);
 
@@ -49,7 +54,7 @@ export default function MarketAnalysisPopup({ isOpen, onClose, ad }: MarketAnaly
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          adDetails: ad,
+          adDetails: ad || {},
           marketData: similarAds
         }),
       });
@@ -141,7 +146,7 @@ export default function MarketAnalysisPopup({ isOpen, onClose, ad }: MarketAnaly
                 </div>
                 <div>
                   <h2 className="text-xl font-black text-white">تحليل السوق</h2>
-                  <p className="text-sm text-white/50">{ad.title}</p>
+                  <p className="text-sm text-white/50">{ad ? ad.title : "نظرة عامة على السوق الجزائري"}</p>
                 </div>
               </div>
               <button 

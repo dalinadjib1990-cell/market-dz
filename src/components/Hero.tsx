@@ -2,9 +2,12 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, MapPin, Car, Star, PlusSquare, Activity } from 'lucide-react';
 import { BRANDS, WILAYAS } from '../constants/data';
+import MarketAnalysisPopup from './MarketAnalysisPopup';
+import { LineChart as LineChartIcon } from 'lucide-react';
 
 export default function Hero() {
   const [search, setSearch] = useState('');
+  const [showMarketAnalysis, setShowMarketAnalysis] = useState(false);
   const [brand, setBrand] = useState('');
   const [wilaya, setWilaya] = useState('');
   const navigate = useNavigate();
@@ -47,7 +50,7 @@ export default function Hero() {
           <p className="text-xl md:text-2xl text-white/60 max-w-3xl mx-auto font-medium leading-relaxed">
             اكتشف آلاف العروض يومياً. بيع وشراء السيارات أصبح أسهل، أسرع، وأكثر أماناً مع <span className="text-white font-bold">Market Auto DZ</span>.
           </p>
-          <div className="pt-4 flex flex-col md:flex-row items-center justify-center gap-4">
+          <div className="pt-4 flex flex-col md:flex-row flex-wrap items-center justify-center gap-4">
             <button 
               onClick={() => navigate('/post')}
               className="btn-primary !py-4 !px-8 text-xl shadow-[0_0_30px_rgba(0,102,51,0.3)] hover:scale-105 transition-all flex items-center gap-3"
@@ -55,6 +58,15 @@ export default function Hero() {
               <PlusSquare size={24} />
               انشر إعلانك الآن مجاناً
             </button>
+            
+            <button 
+              onClick={() => setShowMarketAnalysis(true)}
+              className="btn-secondary !bg-emerald-500/10 !border-emerald-500/30 !text-emerald-400 !py-4 !px-8 text-lg shadow-[0_0_30px_rgba(16,185,129,0.2)] hover:scale-105 hover:bg-emerald-500/20 transition-all flex items-center gap-3 backdrop-blur-md"
+            >
+              <LineChartIcon size={24} className="drop-shadow-[0_0_8px_rgba(16,185,129,0.8)]" />
+              تحليل السوق
+            </button>
+
             <a 
               href="https://chat-gpt-emploi.vercel.app/?fbclid=IwcGRvZgNleHRuA2FlbQIxMQBzcnRjBmFwcF9pZA8yNzUyNTQ2OTI1OTgyNzkAAR6hFdfEel-xLQZmdTOSDcD7SM1700ErYvuHdG75jZf3HaCgN15frINNGicFJQ_aem_wFQP2v-eI0txFtI_BFu_Bg"
               target="_blank"
@@ -117,7 +129,8 @@ export default function Hero() {
             </button>
           ))}
         </div>
-      </div>
+            </div>
+      <MarketAnalysisPopup isOpen={showMarketAnalysis} onClose={() => setShowMarketAnalysis(false)} />
     </div>
   );
 }
