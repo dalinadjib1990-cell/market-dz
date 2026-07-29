@@ -59,7 +59,7 @@ async function startServer() {
       يجب أن يشمل تقييمك:
       1. **نظرة عامة**: رأيك السريع.
       2. **تحليل الصور وتبرير الحكم**: إذا تم إرفاق صور مع الطلب، قم بتحليلها بدقة لتقييم حالة الهيكل (الصبيغة، الصدمات)، الصالون، العجلات، والمحرك إن وجد. **وضح سبب حكمك بشكل دقيق** (مثلاً: "لاحظت اختلاف لون الرفرف الأمامي"، أو "وجود فجوة غير طبيعية بين الباب والهيكل"، أو "آثار فك في براغي غطاء المحرك"). لا تكتفِ بإعطاء النتيجة النهائية فقط، بل اشرح للمستخدم ما رأيته بالضبط في الصور أو استنتجته من الوصف لتبني الثقة.
-      3. **تحليل حالة السيارة ومصاريف الترقيع**: توقع المصاريف المحتملة في المحرك، الهيكل، نظام التعليق، والكهرباء بناءً على وصف الإعلان والصور وسنة الصنع والممشى.
+      3. **تحليل حالة السيارة ومصاريف الترقيع**: توقع المصاريف المحتملة في المحرك، الهيكل، نظام التعليق، والكهرباء بناءً على وصف الإعلان والصور وسنة الصنع والممشى. **مهم جداً**: استخدم أداة بحث جوجل (googleSearch) للبحث عن أحدث أسعار قطع الغيار والمحركات في السوق الجزائري، (لاسيما في الـ Casse)، فمثلاً محرك ياريس 1.3 قد يصل سعره إلى 44 مليون سنتيم (440,000 دج) أو أكثر. أعطِ تقديرات واقعية ودقيقة جداً تعكس الأسعار الحالية للسوق لتجنب تضليل المشتري.
       4. **تحليل السعر**: قارن السعر المطلوب بحالة السوق الحالية، واقترح مجالاً سعرياً عادلاً.
       5. **نصيحة أخيرة للمشتري**: نصيحة صريحة ومباشرة عما إذا كان يستحق شراء السيارة أم لا. راعِ ظروف المشتري ذي الميزانية المحدودة (الزوالي)، وانصحه بواقعية إذا كانت السيارة تناسب ميزانيته أو ستتعبه بمصاريف الصيانة والترقيع.
 
@@ -119,7 +119,7 @@ ${userMessage}
 
       // Try keys randomly or sequentially until one succeeds
       const shuffledKeys = [...keys].sort(() => Math.random() - 0.5);
-      const modelsToTry = ["gemini-3.6-flash", "gemini-3.1-pro-preview", "gemini-flash-latest"];
+      const modelsToTry = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash"];
 
       let isRateLimited = false;
 
@@ -141,7 +141,7 @@ ${userMessage}
               config: {
                 systemInstruction: systemInstruction,
                 temperature: 0.7,
-                
+                tools: [{ googleSearch: {} }]
               },
             });
 
@@ -199,6 +199,7 @@ ${userMessage}
         "explanation": "شرح قصير ومقنع بالدارجة الجزائرية لسبب هذا التوصية بناءً على المعطيات."
       }
       ملاحظة: السعر في trendData، fairPrice، و regionalComparison يجب أن يكون بالدينار الجزائري (دج).
+      أنت متصل بالإنترنت الآن! استخدم أداة البحث في جوجل (googleSearch tool) للبحث في المواقع الجزائرية لمعرفة أحدث الأسعار لسيارات مماثلة في السوق الحقيقي وتوفير بيانات دقيقة ومحدثة اليوم.
             إذا لم تتوفر لديك بيانات حقيقية كافية، استخدم خبرتك في السوق الجزائري لتقدير هذه الأرقام بشكل منطقي ومقنع بناءً على السيارة وسنة الصنع والمسافة المقطوعة.`;
 
       let textContent = adDetails.title ? `معلومات الإعلان الحالي:
@@ -217,7 +218,7 @@ ${JSON.stringify(marketData || [])}`;
 
       // Try keys randomly or sequentially until one succeeds
       const shuffledKeys = [...keys].sort(() => Math.random() - 0.5);
-      const modelsToTry = ["gemini-3.6-flash", "gemini-3.1-pro-preview", "gemini-flash-latest"];
+      const modelsToTry = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash"];
 
       let isRateLimited = false;
       for (let i = 0; i < shuffledKeys.length; i++) {
@@ -238,16 +239,16 @@ ${JSON.stringify(marketData || [])}`;
               config: {
                 systemInstruction: systemInstruction,
                 temperature: 0.5,
-                
+                tools: [{ googleSearch: {} }]
               },
             });
 
             let responseText = response.text || '';
-            const jsonMatch = responseText.match(/```json\n([\s\S]*?)\n```/);
+            const jsonMatch = responseText.match(/\{.*\}/s);
             if (jsonMatch) {
-              responseText = jsonMatch[1];
+              responseText = jsonMatch[0];
             } else {
-              responseText = responseText.replace(/```/g, '').trim();
+              responseText = responseText.replace(/```(json)?/g, '').trim();
             }
 
             return res.json(JSON.parse(responseText));

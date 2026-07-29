@@ -63,6 +63,9 @@ export default function MarketAnalysisPopup({ isOpen, onClose, ad }: MarketAnaly
         throw new Error('Failed to fetch market analysis');
       }
 
+      if (!response.ok) {
+        throw new Error('فشل في جلب البيانات');
+      }
       const result = await response.json();
       setData(result);
     } catch (error) {
