@@ -9,16 +9,17 @@ import {
   MapPin, Calendar, Gauge, CheckCircle2, Phone, MessageSquare, 
   Share2, Heart, ChevronLeft, ChevronRight, User, Star, ShieldCheck,
   Zap, Info, Trash2, Edit2, Activity, X, Search, Droplets, CheckCircle,
-  AlertTriangle, Thermometer, Bot, Loader2
+  AlertTriangle, Thermometer, Bot, Loader2, LineChart as LineChartIcon
 } from 'lucide-react';
 import { cn, generateId } from '../lib/utils';
 import { toast } from 'sonner';
 import { motion } from 'motion/react';
 import { 
-  Radar, RadarChart, PolarGrid, PolarAngleAxis, ResponsiveContainer,
-  BarChart, Bar, XAxis, YAxis, Tooltip, Cell
+  Radar, RadarChart, PolarGrid, PolarAngleAxis, ResponsiveContainer, Tooltip
 } from 'recharts';
+import MarketAnalysisPopup from '../components/MarketAnalysisPopup';
 import Markdown from 'react-markdown';
+import rehypeRaw from 'rehype-raw';
 
 export default function AdDetails() {
   const { id } = useParams();
@@ -33,6 +34,7 @@ export default function AdDetails() {
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
   const [editCommentText, setEditCommentText] = useState('');
   const [showZoom, setShowZoom] = useState(false);
+  const [showMarketAnalysis, setShowMarketAnalysis] = useState(false);
   const [assessingCar, setAssessingCar] = useState(false);
   const [aiAssessmentResult, setAiAssessmentResult] = useState<string | null>(null);
 
@@ -755,6 +757,13 @@ export default function AdDetails() {
                 {assessingCar ? <Loader2 size={20} className="animate-spin" /> : <Bot size={20} />}
                 تقييم الخبير الآلي للإعلان
               </button>
+              <button 
+                onClick={() => setShowMarketAnalysis(true)}
+                className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold py-3 rounded-xl flex items-center justify-center gap-3 hover:scale-105 active:scale-95 transition-all shadow-[0_0_15px_rgba(16,185,129,0.3)] hover:shadow-[0_0_25px_rgba(16,185,129,0.5)]"
+              >
+                <LineChartIcon size={20} />
+                تحليل السوق
+              </button>
             </div>
 
             <div className="pt-8 border-t border-white/5 space-y-4">
@@ -783,48 +792,61 @@ export default function AdDetails() {
       </div>
 
       {aiAssessmentResult && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm z-[100]" onClick={() => setAiAssessmentResult(null)}>
-          <div className="bg-[#111] border border-brand-green/30 rounded-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh] shadow-2xl shadow-brand-green/20" onClick={e => e.stopPropagation()}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/90 backdrop-blur-md z-[100]">
+          <div className="bg-[#111] border border-brand-green/50 rounded-2xl w-full max-w-3xl overflow-hidden flex flex-col max-h-[90vh] shadow-2xl shadow-brand-green/20">
             <div className="p-4 border-b border-white/10 flex items-center justify-between bg-white/5">
               <div className="flex items-center gap-3 text-brand-green">
-                <Bot size={24} />
-                <h3 className="font-bold text-xl">تحليل الخبير الآلي</h3>
+                <Bot size={28} />
+                <h3 className="font-bold text-xl md:text-2xl">تحليل الخبير الآلي</h3>
               </div>
               <button onClick={() => setAiAssessmentResult(null)} className="p-2 text-white/40 hover:text-white hover:bg-white/10 rounded-xl transition-all">
-                <X size={20} />
+                <X size={24} />
               </button>
             </div>
             
-            <div className="p-6 overflow-y-auto no-scrollbar flex flex-col gap-6">
-              <div className="markdown-body text-white/90 leading-relaxed text-base">
-                <Markdown>{displayAssessmentText}</Markdown>
+            <div className="p-6 md:p-8 overflow-y-auto no-scrollbar flex flex-col gap-8">
+              <div className="markdown-body text-white leading-relaxed text-lg md:text-xl font-medium">
+                <Markdown rehypePlugins={[rehypeRaw]}>{displayAssessmentText}</Markdown>
               </div>
 
               {assessmentChartData && (
-                <div className="h-64 w-full bg-white/5 rounded-xl p-4 border border-white/10 mt-2">
-                  <h4 className="text-sm font-bold text-white/60 mb-4 text-center">توقعات مصاريف الصيانة والترقيع (دج)</h4>
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={assessmentChartData} layout="vertical" margin={{ top: 0, right: 40, left: 0, bottom: 0 }}>
-                      <XAxis type="number" hide />
-                      <YAxis dataKey="name" type="category" width={90} tick={{ fill: '#888', fontSize: 13 }} axisLine={false} tickLine={false} />
-                      <Tooltip 
-                        cursor={{fill: 'rgba(255,255,255,0.05)'}} 
-                        contentStyle={{backgroundColor: '#111', borderColor: '#333', borderRadius: '8px', textAlign: 'right'}}
-                        formatter={(value: any) => [`${value} دج`, 'التكلفة']}
-                      />
-                      <Bar dataKey="cost" radius={[0, 4, 4, 0]}>
-                        {assessmentChartData.map((entry: any, index: number) => (
-                          <Cell key={`cell-${index}`} fill={entry.cost > 0 ? '#ef4444' : '#10b981'} />
-                        ))}
-                      </Bar>
-                    </BarChart>
-                  </ResponsiveContainer>
+                <div className="w-full bg-black/40 rounded-2xl p-6 md:p-8 border border-white/10 mt-4 shadow-xl">
+                  <h4 className="text-xl md:text-2xl font-bold text-white/90 mb-8 text-center flex items-center justify-center gap-3">
+                    <span className="w-8 h-[2px] bg-indigo-500 rounded-full"></span>
+                    توقعات مصاريف الصيانة والترقيع
+                    <span className="w-8 h-[2px] bg-indigo-500 rounded-full"></span>
+                  </h4>
+                  <div className="flex flex-col gap-6">
+                    {assessmentChartData.map((item: any, index: number) => {
+                      const maxCost = Math.max(...assessmentChartData.map((d: any) => d.cost));
+                      const percentage = maxCost > 0 ? (item.cost / maxCost) * 100 : 0;
+                      return (
+                        <div key={index} className="flex flex-col gap-2">
+                          <div className="flex justify-between items-center text-sm md:text-base font-bold">
+                            <span className="text-white/80">{item.name}</span>
+                            <span className="text-red-400 font-black tracking-wider bg-red-500/10 px-3 py-1 rounded-lg">
+                              {item.cost.toLocaleString()} دج
+                            </span>
+                          </div>
+                          <div className="w-full bg-white/5 rounded-full h-3 md:h-4 overflow-hidden border border-white/5 flex justify-end">
+                            <div 
+                              className="bg-gradient-to-l from-red-500 to-rose-600 rounded-full h-full transition-all duration-1000 relative overflow-hidden"
+                              style={{ width: `${percentage}%` }}
+                            >
+                               <div className="absolute inset-0 bg-white/20 w-full h-full -translate-x-full animate-shimmer"></div>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
               )}
             </div>
           </div>
         </div>
       )}
+      {ad && <MarketAnalysisPopup isOpen={showMarketAnalysis} onClose={() => setShowMarketAnalysis(false)} ad={ad} />}
     </div>
   );
 }

@@ -214,7 +214,7 @@ export default function Search() {
                     searchParams.set('minPrice', e.target.value);
                     setSearchParams(searchParams);
                   }}
-                  className="input-field !py-2 text-sm" 
+                  className="input-field !py-2 text-base" 
                 />
                 <input 
                   type="number" 
@@ -224,7 +224,7 @@ export default function Search() {
                     searchParams.set('maxPrice', e.target.value);
                     setSearchParams(searchParams);
                   }}
-                  className="input-field !py-2 text-sm" 
+                  className="input-field !py-2 text-base" 
                 />
               </div>
             </div>
@@ -240,7 +240,7 @@ export default function Search() {
                     searchParams.set('minYear', e.target.value);
                     setSearchParams(searchParams);
                   }}
-                  className="input-field !py-2 text-sm" 
+                  className="input-field !py-2 text-base" 
                 />
                 <input 
                   type="number" 
@@ -250,7 +250,7 @@ export default function Search() {
                     searchParams.set('maxYear', e.target.value);
                     setSearchParams(searchParams);
                   }}
-                  className="input-field !py-2 text-sm" 
+                  className="input-field !py-2 text-base" 
                 />
               </div>
             </div>

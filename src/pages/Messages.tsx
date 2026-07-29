@@ -10,7 +10,8 @@ import { toast } from 'sonner';
 import { cn } from '../lib/utils';
 import { useNavigate } from 'react-router-dom';
 import Markdown from 'react-markdown';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, Cell, ResponsiveContainer } from 'recharts';
+
+import rehypeRaw from 'rehype-raw';
 
 const NOTIFICATION_SOUND = 'https://assets.mixkit.co/active_storage/sfx/2358/2358-preview.mp3';
 
@@ -32,27 +33,39 @@ function AIMessageContent({ text }: { text: string }) {
   return (
     <div className="flex flex-col gap-4">
       <div className="markdown-body text-white/90 leading-relaxed text-sm">
-        <Markdown>{displayText}</Markdown>
+        <Markdown rehypePlugins={[rehypeRaw]}>{displayText}</Markdown>
       </div>
       {chartData && (
-        <div className="h-48 w-full bg-black/20 rounded-xl p-3 border border-indigo-500/20 mt-2">
-          <h4 className="text-xs font-bold text-indigo-200 mb-3 text-center">مصاريف الترقيع المتوقعة (دج)</h4>
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={chartData} layout="vertical" margin={{ top: 0, right: 30, left: 0, bottom: 0 }}>
-              <XAxis type="number" hide />
-              <YAxis dataKey="name" type="category" width={70} tick={{ fill: '#a5b4fc', fontSize: 10 }} axisLine={false} tickLine={false} />
-              <Tooltip 
-                cursor={{fill: 'rgba(255,255,255,0.05)'}} 
-                contentStyle={{backgroundColor: '#1e1b4b', borderColor: '#3730a3', borderRadius: '8px', textAlign: 'right', fontSize: '12px'}}
-                formatter={(value: any) => [`${value} دج`, 'التكلفة']}
-              />
-              <Bar dataKey="cost" radius={[0, 4, 4, 0]}>
-                {chartData.map((entry: any, index: number) => (
-                  <Cell key={`cell-${index}`} fill={entry.cost > 0 ? '#ef4444' : '#10b981'} />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
+        <div className="w-full bg-black/40 rounded-xl p-4 md:p-5 border border-indigo-500/30 mt-4 shadow-lg">
+          <h4 className="text-sm font-bold text-indigo-300 mb-5 text-center flex items-center justify-center gap-2">
+            <span className="w-4 h-[2px] bg-indigo-500/50 rounded-full"></span>
+            مصاريف الترقيع المتوقعة
+            <span className="w-4 h-[2px] bg-indigo-500/50 rounded-full"></span>
+          </h4>
+          <div className="flex flex-col gap-4">
+            {chartData.map((item: any, index: number) => {
+              const maxCost = Math.max(...chartData.map((d: any) => d.cost));
+              const percentage = maxCost > 0 ? (item.cost / maxCost) * 100 : 0;
+              return (
+                <div key={index} className="flex flex-col gap-1.5">
+                  <div className="flex justify-between items-center text-xs md:text-sm font-bold">
+                    <span className="text-white/80">{item.name}</span>
+                    <span className="text-red-400 font-black bg-red-500/10 px-2 py-0.5 rounded text-[11px] md:text-xs">
+                      {item.cost.toLocaleString()} دج
+                    </span>
+                  </div>
+                  <div className="w-full bg-white/5 rounded-full h-2 md:h-2.5 overflow-hidden flex justify-end">
+                    <div 
+                      className="bg-gradient-to-l from-red-500 to-rose-600 rounded-full h-full transition-all duration-1000 relative overflow-hidden"
+                      style={{ width: `${percentage}%` }}
+                    >
+                      <div className="absolute inset-0 bg-white/20 w-full h-full -translate-x-full animate-shimmer"></div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
       )}
     </div>
@@ -427,7 +440,7 @@ export default function Messages() {
             </div>
             <div className="relative">
               <Search className="absolute right-3 top-1/2 -translate-y-1/2 text-white/20" size={16} />
-              <input type="text" placeholder="بحث في المحادثات..." className="w-full bg-white/5 border border-white/10 rounded-xl py-2 pr-10 pl-4 text-sm outline-none" />
+              <input type="text" placeholder="بحث في المحادثات..." className="w-full bg-white/5 border border-white/10 rounded-xl py-2 pr-10 pl-4 text-base outline-none" />
             </div>
           </div>
           <div className="flex-1 overflow-y-auto no-scrollbar">
@@ -689,7 +702,7 @@ export default function Messages() {
                             type="text" 
                             value={editText} 
                             onChange={(e) => setEditText(e.target.value)}
-                            className="w-full bg-black/20 border border-white/10 rounded-lg p-2 text-xs outline-none"
+                            className="w-full bg-black/20 border border-white/10 rounded-lg p-2 text-base outline-none"
                             autoFocus
                           />
                           <div className="flex justify-end gap-2">
@@ -750,13 +763,13 @@ export default function Messages() {
                     <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} disabled={uploading} />
                   </label>
                 </div>
-                <div className="flex-1 relative">
+                <div className="flex-1 relative min-w-0">
                   <input
                     type="text"
                     placeholder="اكتب رسالتك..."
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}
-                    className="w-full bg-white/5 border border-white/10 rounded-xl md:rounded-2xl py-2 md:py-3 px-4 md:px-6 text-sm outline-none focus:border-brand-green/50 focus:bg-white/10 transition-all"
+                    className="w-full bg-white/5 border border-white/10 rounded-xl md:rounded-2xl py-2 md:py-3 px-4 md:px-6 text-base outline-none focus:border-brand-green/50 focus:bg-white/10 transition-all"
                     dir="auto"
                   />
                 </div>
