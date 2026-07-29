@@ -141,6 +141,7 @@ ${userMessage}
               config: {
                 systemInstruction: systemInstruction,
                 temperature: 0.7,
+                
               },
             });
 
@@ -198,7 +199,7 @@ ${userMessage}
         "explanation": "شرح قصير ومقنع بالدارجة الجزائرية لسبب هذا التوصية بناءً على المعطيات."
       }
       ملاحظة: السعر في trendData، fairPrice، و regionalComparison يجب أن يكون بالدينار الجزائري (دج).
-      إذا لم تتوفر لديك بيانات حقيقية كافية، استخدم خبرتك في السوق الجزائري لتقدير هذه الأرقام بشكل منطقي ومقنع بناءً على السيارة وسنة الصنع والمسافة المقطوعة.`;
+            إذا لم تتوفر لديك بيانات حقيقية كافية، استخدم خبرتك في السوق الجزائري لتقدير هذه الأرقام بشكل منطقي ومقنع بناءً على السيارة وسنة الصنع والمسافة المقطوعة.`;
 
       let textContent = adDetails.title ? `معلومات الإعلان الحالي:
 العنوان: ${adDetails.title || 'غير متوفر'}
@@ -237,6 +238,7 @@ ${JSON.stringify(marketData || [])}`;
               config: {
                 systemInstruction: systemInstruction,
                 temperature: 0.5,
+                
               },
             });
 

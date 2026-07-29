@@ -1,11 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Car, User, LogOut, PlusSquare, MessageSquare, Search, Shield, Activity } from 'lucide-react';
 import { auth } from '../lib/firebase';
 import { useAuth } from '../hooks/useAuth';
+import MarketAnalysisPopup from './MarketAnalysisPopup';
+import { LineChart as LineChartIcon } from 'lucide-react';
 
 export default function Header() {
   const { user, profile, isAdmin } = useAuth();
+  const [showMarketAnalysis, setShowMarketAnalysis] = useState(false);
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -32,8 +35,15 @@ export default function Header() {
           <Link to="/" className="text-sm font-medium hover:text-brand-green transition-colors">الرئيسية</Link>
           <Link to="/search" className="text-sm font-medium hover:text-brand-green transition-colors">البحث</Link>
           <Link to="/verified" className="text-sm font-medium hover:text-brand-green transition-colors">سيارات موثوقة</Link>
+                    <button 
+            onClick={() => setShowMarketAnalysis(true)}
+            className="flex items-center gap-2 text-sm font-bold text-emerald-400 hover:text-emerald-300 transition-colors drop-shadow-[0_0_8px_rgba(16,185,129,0.5)] bg-emerald-400/10 px-3 py-1.5 rounded-full border border-emerald-400/20 hidden lg:flex"
+          >
+            <LineChartIcon className="w-4 h-4" />
+            تحليل السوق
+          </button>
           <a 
-            href="https://chat-gpt-emploi.vercel.app/?fbclid=IwcGRvZgNleHRuA2FlbQIxMQBzcnRjBmFwcF9pZA8yNzUyNTQ2OTI1OTgyNzkAAR6hFdfEel-xLQZmdTOSDcD7SM1700ErYvuHdG75jZf3HaCgN15frINNGicFJQ_aem_wFQP2v-eI0txFtI_BFu_Bg" 
+             href="https://chat-gpt-emploi.vercel.app/?fbclid=IwcGRvZgNleHRuA2FlbQIxMQBzcnRjBmFwcF9pZA8yNzUyNTQ2OTI1OTgyNzkAAR6hFdfEel-xLQZmdTOSDcD7SM1700ErYvuHdG75jZf3HaCgN15frINNGicFJQ_aem_wFQP2v-eI0txFtI_BFu_Bg" 
             target="_blank" 
             rel="noopener noreferrer"
             className="flex items-center gap-2 text-sm font-bold text-cyan-400 hover:text-cyan-300 transition-colors drop-shadow-[0_0_8px_rgba(34,211,238,0.5)] bg-cyan-400/10 px-3 py-1.5 rounded-full border border-cyan-400/20"
@@ -97,6 +107,7 @@ export default function Header() {
           )}
         </div>
       </div>
+      <MarketAnalysisPopup isOpen={showMarketAnalysis} onClose={() => setShowMarketAnalysis(false)} />
     </header>
   );
 }
