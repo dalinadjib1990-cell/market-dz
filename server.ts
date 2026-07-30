@@ -142,7 +142,7 @@ ${userMessage}
               config: {
                 systemInstruction: systemInstruction,
                 temperature: 0.7,
-                // tools: [{ googleSearch: {} }]
+                tools: [{ googleSearch: {} }]
               },
             });
 
@@ -240,8 +240,8 @@ ${JSON.stringify(marketData || [])}`;
               config: {
                 systemInstruction: systemInstruction,
                 temperature: 0.5,
-                // tools: [{ googleSearch: {} }] // Removed to avoid empty responses
-                responseMimeType: "application/json"
+                tools: [{ googleSearch: {} }] // Removed to avoid empty responses
+                // responseMimeType: "application/json"
               },
             });
             let responseText = response.text || '';
