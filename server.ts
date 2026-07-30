@@ -120,7 +120,7 @@ ${userMessage}
 
       // Try keys randomly or sequentially until one succeeds
       const shuffledKeys = [...keys].sort(() => Math.random() - 0.5);
-      const modelsToTry = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash-8b"];
+      const modelsToTry = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-pro"];
 
       let isRateLimited = false;
 
@@ -142,7 +142,7 @@ ${userMessage}
               config: {
                 systemInstruction: systemInstruction,
                 temperature: 0.7,
-                tools: [{ googleSearch: {} }]
+                // tools: [{ googleSearch: {} }]
               },
             });
 
@@ -219,7 +219,7 @@ ${JSON.stringify(marketData || [])}`;
 
       // Try keys randomly or sequentially until one succeeds
       const shuffledKeys = [...keys].sort(() => Math.random() - 0.5);
-      const modelsToTry = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash-8b"];
+      const modelsToTry = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-pro"];
 
       let isRateLimited = false;
       for (let i = 0; i < shuffledKeys.length; i++) {
@@ -240,18 +240,26 @@ ${JSON.stringify(marketData || [])}`;
               config: {
                 systemInstruction: systemInstruction,
                 temperature: 0.5,
-                tools: [{ googleSearch: {} }]
+                // tools: [{ googleSearch: {} }] // Removed to avoid empty responses
+                responseMimeType: "application/json"
               },
             });
-
-let responseText = response.text || '';
-            const jsonMatch = responseText.match(/\{.*\}/s);
+            let responseText = response.text || '';
+            if (!responseText) throw new Error("Empty response");
+            const jsonMatch = responseText.match(/\{[\s\S]*\}/);
             if (jsonMatch) {
               responseText = jsonMatch[0];
             } else {
-              responseText = responseText.replace(/```(json)?/g, '').trim();
+              responseText = responseText.replace(/\`\`\`(json)?/g, '').trim();
             }
-            return res.json(JSON.parse(responseText));
+            
+            if (!responseText) throw new Error("Empty response");
+            
+            try {
+              return res.json(JSON.parse(responseText));
+            } catch (e) {
+              throw new Error("Invalid JSON: " + responseText.substring(0, 100));
+            }
 
           } catch (error: any) {
             fs.appendFileSync('gemini_error.log', `Error with key index ${i} using model ${modelName} in market-analysis: ${error.message}\n`);
