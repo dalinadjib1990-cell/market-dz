@@ -418,7 +418,7 @@ export default function Messages({ isWidget = false, initialChatId }: { isWidget
   if (!user) return null;
 
   return (
-    <div className={`max-w-7xl mx-auto px-0 md:px-4 ${isWidget ? 'h-full py-0' : 'h-[calc(100dvh-64px)] md:h-[calc(100vh-80px)] py-0 md:py-8'}`}>
+    <div className={`max-w-7xl w-full mx-auto px-0 md:px-4 ${isWidget ? 'h-full py-0' : 'h-[calc(100dvh-64px)] md:h-[calc(100vh-80px)] py-0 md:py-8'}`}>
       <div className="glass-card h-full flex overflow-hidden relative rounded-none md:rounded-2xl border-x-0 md:border-x">
         {/* Sidebar */}
         <div className={cn(
@@ -535,7 +535,7 @@ export default function Messages({ isWidget = false, initialChatId }: { isWidget
 
         {/* Chat Area */}
         <div className={cn(
-          "flex-1 flex flex-col transition-all duration-300 relative h-full",
+          "flex-1 flex flex-col transition-all duration-300 relative h-full min-w-0 w-full",
           !activeChat ? "hidden md:flex" : "flex"
         )}>
           {activeChat ? (
@@ -761,7 +761,7 @@ export default function Messages({ isWidget = false, initialChatId }: { isWidget
               </div>
 
               {/* Quick Replies always accessible */}
-              <div className="flex gap-2 px-4 py-2 overflow-x-auto no-scrollbar border-t border-white/5 bg-[#0a0a0a]/50">
+              <div className="flex gap-2 px-4 py-2 overflow-x-auto no-scrollbar border-t border-white/5 bg-[#0a0a0a]/50 min-w-0 w-full shrink-0">
                 {QUICK_REPLIES.map((reply, i) => (
                   <button
                     key={i}
