@@ -1,62 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { CarFront, X } from 'lucide-react';
-import { collection, query, where, onSnapshot } from 'firebase/firestore';
-import { db } from '../lib/firebase';
-import { useAuth } from '../hooks/useAuth';
-import { useLocation } from 'react-router-dom';
-import { cn } from '../lib/utils';
-import Messages from '../pages/Messages';
+import fs from 'fs';
+let content = fs.readFileSync('src/components/FloatingChatBubble.tsx', 'utf8');
 
-export default function FloatingChatBubble() {
-  const { user } = useAuth();
-  const location = useLocation();
-  const [unreadCount, setUnreadCount] = useState(0);
-  const [isOpen, setIsOpen] = useState(false);
-  const [targetChatId, setTargetChatId] = useState<string | null>(null);
-
-  useEffect(() => {
-    const handleOpen = (e: any) => {
-      setIsOpen(true);
-      if (e.detail?.chatId) {
-        setTargetChatId(e.detail.chatId);
-      }
-    };
-    window.addEventListener('open-chat-bubble', handleOpen);
-    return () => window.removeEventListener('open-chat-bubble', handleOpen);
-  }, []);
-  
-  useEffect(() => {
-    if (!user) return;
-
-    const q = query(
-      collection(db, 'chats'),
-      where('participants', 'array-contains', user.uid)
-    );
-
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      let total = 0;
-      snapshot.docs.forEach(doc => {
-        const data = doc.data();
-        if (data.unreadCount && data.unreadCount[user.uid]) {
-          total += data.unreadCount[user.uid];
-        }
-      });
-      setUnreadCount(total);
-    }, (error) => {
-      if (error.code !== 'permission-denied') {
-        console.error("FloatingChatBubble listener error:", error);
-      }
-    });
-
-    return () => unsubscribe();
-  }, [user]);
-
-  // Hide on messages route
-  if (!user || location.pathname === '/messages') return null;
-
-  return (
+// Replace the return statement
+const newReturn = `  return (
     <>
+      {/* The Chat Window */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -64,7 +12,7 @@ export default function FloatingChatBubble() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.9 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="fixed inset-0 z-[100] sm:inset-auto sm:bottom-[100px] sm:right-6 overflow-hidden sm:rounded-2xl border-0 sm:border border-white/10 bg-[#0a0a0a]/95 backdrop-blur-xl shadow-[0_10px_40px_rgba(0,0,0,0.8)] flex flex-col w-full h-[100dvh] sm:w-[90vw] sm:max-w-[800px] sm:h-[80vh] sm:max-h-[800px] pointer-events-auto"
+            className="fixed inset-0 z-[100] sm:inset-auto sm:bottom-[100px] sm:right-6 overflow-hidden sm:rounded-2xl border-0 sm:border border-white/10 bg-[#0a0a0a]/95 backdrop-blur-xl shadow-[0_10px_40px_rgba(0,0,0,0.8)] flex flex-col w-full h-[100dvh] sm:w-[450px] lg:w-[600px] sm:h-[70vh] sm:max-h-[800px] pointer-events-auto"
           >
             <div className="bg-gradient-to-r from-brand-green/20 to-black border-b border-brand-green/30 p-4 pt-6 flex justify-between items-center z-10 shrink-0">
               <span className="font-black text-brand-green flex items-center gap-2 text-lg">
@@ -85,6 +33,7 @@ export default function FloatingChatBubble() {
         )}
       </AnimatePresence>
 
+      {/* The Floating Button */}
       <div className="fixed bottom-20 right-4 md:right-6 z-[90] pointer-events-auto">
         <motion.button
           whileHover={{ scale: 1.05 }}
@@ -116,4 +65,8 @@ export default function FloatingChatBubble() {
       </div>
     </>
   );
-}
+}`;
+
+content = content.replace(/  return \([\s\S]*?\);\n\}/, newReturn + '\n}');
+fs.writeFileSync('src/components/FloatingChatBubble.tsx', content);
+console.log("FloatingChatBubble rewritten");

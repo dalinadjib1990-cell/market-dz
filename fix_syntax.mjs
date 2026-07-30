@@ -1,4 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import fs from 'fs';
+let content = fs.readFileSync('src/components/FloatingChatBubble.tsx', 'utf8');
+
+// I accidentally broke the useEffect for open-chat-bubble and removed the second useEffect.
+// Let's rewrite the whole file to be safe.
+const fullFile = `import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CarFront, X } from 'lucide-react';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
@@ -117,3 +122,6 @@ export default function FloatingChatBubble() {
     </>
   );
 }
+`;
+fs.writeFileSync('src/components/FloatingChatBubble.tsx', fullFile);
+console.log("FloatingChatBubble completely fixed");

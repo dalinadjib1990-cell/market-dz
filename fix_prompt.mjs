@@ -1,9 +1,10 @@
 import fs from 'fs';
-let content = fs.readFileSync('server.ts', 'utf8');
+let content = fs.readFileSync('src/lib/gemini.ts', 'utf8');
 
 content = content.replace(
-  /أنت متصل بالإنترنت الآن! استخدم محرك بحث جوجل للبحث في المواقع الجزائرية \(مثل واد كنيس Ouedkniss، Autobip، وغيرها\) لمعرفة أحدث الأسعار لسيارات مماثلة في السوق الحقيقي وتوفير بيانات دقيقة ومحدثة \(Mise à jour\) اليوم\.\n/,
-  ""
+  /You are an expert car market analyst in Algeria./g,
+  'You are an expert car market analyst in Algeria. You must analyze the market using the most recent data conceptually available to you, acting as an external live source of market dynamics. Once the platform is fully launched, this prompt will be augmented with live platform data.'
 );
 
-fs.writeFileSync('server.ts', content);
+fs.writeFileSync('src/lib/gemini.ts', content);
+console.log("Prompt updated");

@@ -245,7 +245,7 @@ export default function AdDetails() {
         chatId = existingChat.id;
       }
       
-      navigate('/messages');
+      window.dispatchEvent(new CustomEvent('open-chat-bubble', { detail: { chatId } }));
     } catch (error: any) {
       console.error('Start Chat Error:', error);
       if (error.message?.includes('Missing or insufficient permissions')) {

@@ -56,10 +56,10 @@ export default function Header() {
         <div className="flex items-center gap-2 sm:gap-4">
           {user ? (
             <>
-              <Link to="/messages" className="p-2 hover:bg-white/5 rounded-full transition-colors relative hidden xs:flex">
+              <button onClick={(e) => { e.preventDefault(); window.dispatchEvent(new CustomEvent('open-chat-bubble')); }} className="p-2 hover:bg-white/5 rounded-full transition-colors relative hidden xs:flex">
                 <MessageSquare size={20} />
                 <span className="absolute top-1 right-1 w-2 h-2 bg-brand-red rounded-full"></span>
-              </Link>
+              </button>
               {isAdmin && (
                 <Link to="/admin" className="flex items-center gap-2 px-3 py-2 bg-brand-green/10 text-brand-green rounded-xl text-[10px] sm:text-xs font-black border border-brand-green/20 hover:bg-brand-green hover:text-white transition-all shadow-lg shadow-brand-green/5">
                   <Shield size={16} />
@@ -89,10 +89,10 @@ export default function Header() {
                     <User size={18} />
                     حسابي الشخصي
                   </Link>
-                  <Link to="/messages" className="flex xs:hidden items-center gap-2 p-2.5 hover:bg-white/5 rounded-lg text-sm transition-colors">
+                  <button onClick={(e) => { e.preventDefault(); window.dispatchEvent(new CustomEvent('open-chat-bubble')); }} className="flex xs:hidden items-center gap-2 w-full p-2.5 hover:bg-white/5 rounded-lg text-sm transition-colors">
                     <MessageSquare size={18} />
                     الرسائل
-                  </Link>
+                  </button>
                   <button onClick={handleLogout} className="w-full flex items-center gap-2 p-2.5 hover:bg-brand-red/10 text-brand-red rounded-lg text-sm transition-colors mt-1">
                     <LogOut size={18} />
                     تسجيل الخروج

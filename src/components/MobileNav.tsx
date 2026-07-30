@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Home, Search, PlusSquare, MessageSquare, User, Shield } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { cn } from '../lib/utils';
@@ -7,6 +7,7 @@ import { cn } from '../lib/utils';
 export default function MobileNav() {
   const { user, profile, isAdmin } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
 
   if (!user) return null;
 
@@ -24,9 +25,16 @@ export default function MobileNav() {
         {navItems.map((item) => {
           const isActive = location.pathname === item.path;
           return (
-            <Link
+            <button
               key={item.path}
-              to={item.path}
+              onClick={(e) => {
+                if (item.path === '/messages') {
+                  e.preventDefault();
+                  window.dispatchEvent(new CustomEvent('open-chat-bubble'));
+                } else {
+                  navigate(item.path);
+                }
+              }}
               className={cn(
                 "flex flex-col items-center gap-1 transition-all flex-1",
                 item.primary ? "relative -top-6" : "p-1",
@@ -35,12 +43,12 @@ export default function MobileNav() {
             >
               <div className={cn(
                 "transition-all",
-                item.primary ? "w-14 h-14 bg-brand-green rounded-2xl flex items-center justify-center text-white shadow-lg shadow-brand-green/40 scale-110" : "w-6 h-6"
+                item.primary ? "w-14 h-14 bg-brand-green rounded-2xl flex items-center justify-center text-white shadow-lg shadow-brand-green/40 scale-110 -translate-y-2" : "w-6 h-6"
               )}>
                 <item.icon size={item.primary ? 28 : 22} />
               </div>
               {!item.primary && <span className="text-[8px] font-bold whitespace-nowrap">{item.label}</span>}
-            </Link>
+            </button>
           );
         })}
       </div>

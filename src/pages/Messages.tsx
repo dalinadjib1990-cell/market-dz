@@ -72,7 +72,7 @@ function AIMessageContent({ text }: { text: string }) {
   );
 }
 
-export default function Messages() {
+export default function Messages({ isWidget = false, initialChatId }: { isWidget?: boolean, initialChatId?: string | null }) {
   const { user, profile } = useAuth();
   const [chats, setChats] = useState<Chat[]>([]);
   const [activeChat, setActiveChat] = useState<Chat | null>(null);
@@ -199,6 +199,7 @@ export default function Messages() {
       });
       
       setChats(updatedChats);
+      
       setLoading(false);
     }, (error) => {
       handleFirestoreError(error, OperationType.LIST, 'chats');
@@ -206,6 +207,15 @@ export default function Messages() {
     });
     return () => unsubChats();
   }, [user, soundEnabled]);
+
+  useEffect(() => {
+    if (initialChatId && chats.length > 0) {
+      const target = chats.find(c => c.id === initialChatId);
+      if (target && target.id !== activeChat?.id) {
+        setActiveChat(target);
+      }
+    }
+  }, [initialChatId, chats]);
 
   useEffect(() => {
     if (!activeChat) {
@@ -408,7 +418,7 @@ export default function Messages() {
   if (!user) return null;
 
   return (
-    <div className="max-w-7xl mx-auto px-0 md:px-4 h-[calc(100dvh-160px)] md:h-[calc(100vh-80px)] py-0 md:py-8">
+    <div className={`max-w-7xl mx-auto px-0 md:px-4 ${isWidget ? 'h-full py-0' : 'h-[calc(100dvh-64px)] md:h-[calc(100vh-80px)] py-0 md:py-8'}`}>
       <div className="glass-card h-full flex overflow-hidden relative rounded-none md:rounded-2xl border-x-0 md:border-x">
         {/* Sidebar */}
         <div className={cn(
@@ -631,14 +641,14 @@ export default function Messages() {
                   onClick={() => navigate(`/ad/${activeChat.adId}`)}
                 >
                   {(activeChat.adImage || activeAd?.images?.[0]) ? (
-                    <img src={activeChat.adImage || activeAd?.images?.[0]} alt={activeChat.adTitle} className="w-16 h-12 rounded-lg object-cover" />
+                    <img src={activeChat.adImage || activeAd?.images?.[0]} alt={activeChat.adTitle} className="w-20 h-16 rounded-lg object-cover shrink-0" />
                   ) : (
-                    <div className="w-16 h-12 rounded-lg bg-black/50 flex items-center justify-center">
+                    <div className="w-20 h-16 rounded-lg bg-black/50 flex items-center justify-center shrink-0">
                        <ImageIcon size={20} className="text-white/20" />
                     </div>
                   )}
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-bold truncate text-brand-green">{activeChat.adTitle || activeAd?.title}</p>
+                  <div className="flex-1 min-w-0 py-1">
+                    <p className="text-sm font-bold text-brand-green line-clamp-2">{activeChat.adTitle || activeAd?.title}</p>
                     <div className="flex items-center gap-2 mt-1 flex-wrap">
                       <span className="text-xs text-emerald-400 font-black">
                         {(activeChat.adPrice || activeAd?.price)?.toLocaleString() || '---'} دج
@@ -685,9 +695,9 @@ export default function Messages() {
                     "flex group relative w-full mb-6 items-end",
                     isAI ? "justify-center" : (isMe ? "justify-start" : "justify-end")
                   )}>
-                    <div className="flex flex-col gap-1 max-w-[85%] md:max-w-[70%]">
+                    <div className="flex flex-col gap-1 max-w-[95%] md:max-w-[85%]">
                       <div className={cn(
-                        "relative shadow-sm whitespace-pre-wrap leading-relaxed w-fit",
+                        "relative shadow-sm whitespace-pre-wrap leading-relaxed w-fit break-words",
                         isAI 
                           ? "bg-gradient-to-br from-indigo-900/30 to-blue-900/10 text-white rounded-2xl border border-indigo-500/20 w-full p-4 md:p-5" 
                           : (isMe
@@ -763,7 +773,7 @@ export default function Messages() {
                 ))}
               </div>
 
-              <form onSubmit={handleSendMessage} className="p-4 md:p-6 border-t border-white/10 flex gap-2 md:gap-4 bg-[#0a0a0a]/80 backdrop-blur-xl sticky bottom-0">
+              <form onSubmit={handleSendMessage} className={`p-4 md:p-6 border-t border-white/10 flex gap-2 md:gap-4 bg-[#0a0a0a]/90 backdrop-blur-xl shrink-0 ${isWidget ? '' : 'pb-24 md:pb-6'}`}>
                 <div className="flex items-center">
                   <label className="p-2 md:p-3 bg-white/5 hover:bg-white/10 rounded-xl md:rounded-2xl cursor-pointer transition-all text-white/40 hover:text-white">
                     {uploading ? <Loader2 className="animate-spin" size={18} /> : <ImageIcon size={18} />}
@@ -780,7 +790,7 @@ export default function Messages() {
                     dir="auto"
                   />
                 </div>
-                <button type="submit" disabled={!newMessage.trim() && !uploading} className="shrink-0 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center bg-brand-green text-white rounded-xl md:rounded-2xl hover:scale-105 active:scale-95 transition-all shadow-lg shadow-brand-green/20 disabled:opacity-50 disabled:pointer-events-none">
+                <button type="submit" disabled={!newMessage.trim() && !uploading} className="shrink-0 min-w-[40px] w-10 h-10 md:min-w-[48px] md:w-12 md:h-12 flex items-center justify-center bg-brand-green text-white rounded-xl md:rounded-2xl hover:scale-105 active:scale-95 transition-all shadow-lg shadow-brand-green/20 disabled:opacity-50 disabled:pointer-events-none">
                   <Send size={18} className="rtl:-scale-x-100" />
                 </button>
               </form>

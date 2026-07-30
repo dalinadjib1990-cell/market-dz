@@ -23,6 +23,7 @@ import { ShieldAlert } from 'lucide-react';
 import { toast } from 'sonner';
 
 function AppContent() {
+  const isWidget = new URLSearchParams(window.location.search).get('widget') === 'true';
   const { loading, isAdmin, user } = useAuth();
 
   // Master Admin Real-time Security Alerts
@@ -56,8 +57,8 @@ function AppContent() {
       <div className="min-h-screen bg-[#0a0a0a] flex flex-col w-full" dir="rtl">
         <SecurityMonitor />
         <AgreementModal />
-        <Header />
-        <main className="flex-1 pb-20 md:pb-0 w-full">
+        {!isWidget && <Header />}
+        <main className={`flex-1 ${isWidget ? 'pb-0' : 'pb-20 md:pb-0'} w-full`}>
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/search" element={<Search />} />
@@ -70,9 +71,10 @@ function AppContent() {
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           </Routes>
         </main>
-        <FloatingChatBubble />
-        <MobileNav />
-        <footer className="bg-[#0a0a0a] border-t border-white/10 py-12 hidden md:block">
+        {!isWidget && <FloatingChatBubble />}
+        {!isWidget && <MobileNav />}
+        {!isWidget && (
+<footer className="bg-[#0a0a0a] border-t border-white/10 py-12 hidden md:block">
           <div className="max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-4 gap-12">
             <div className="space-y-4">
               <div className="flex items-center gap-2">
@@ -130,6 +132,7 @@ function AppContent() {
             © 2026 Market Auto DZ. جميع الحقوق محفوظة. v1.0.5 | صنع بكل فخر في الجزائر 🇩🇿
           </div>
         </footer>
+        )}
         <Toaster position="top-center" richColors />
       </div>
     </Router>
