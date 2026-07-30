@@ -36,11 +36,11 @@ function AIMessageContent({ text }: { text: string }) {
         <Markdown rehypePlugins={[rehypeRaw]}>{displayText}</Markdown>
       </div>
       {chartData && (
-        <div className="w-full bg-black/40 rounded-xl p-4 md:p-5 border border-indigo-500/30 mt-4 shadow-lg">
-          <h4 className="text-sm font-bold text-indigo-300 mb-5 text-center flex items-center justify-center gap-2">
-            <span className="w-4 h-[2px] bg-indigo-500/50 rounded-full"></span>
+        <div className="w-full bg-black/40 rounded-xl p-4 md:p-5 border border-white/10 mt-4 shadow-xl">
+          <h4 className="text-base md:text-lg font-bold text-white/90 mb-5 text-center flex items-center justify-center gap-2">
+            <span className="w-6 h-[2px] bg-indigo-500 rounded-full"></span>
             مصاريف الترقيع المتوقعة
-            <span className="w-4 h-[2px] bg-indigo-500/50 rounded-full"></span>
+            <span className="w-6 h-[2px] bg-indigo-500 rounded-full"></span>
           </h4>
           <div className="flex flex-col gap-4">
             {chartData.map((item: any, index: number) => {
@@ -234,10 +234,10 @@ export default function Messages({ isWidget = false, initialChatId }: { isWidget
       // Sort in memory
       updatedMessages.sort((a, b) => {
         const getTime = (val: any) => {
-          if (!val) return 0;
+          if (!val) return Date.now(); // Assume new messages without timestamps are now
           if (typeof val.toMillis === 'function') return val.toMillis();
           if (val.seconds) return val.seconds * 1000;
-          return 0;
+          return Date.now();
         };
         return getTime(a.createdAt) - getTime(b.createdAt);
       });
@@ -699,13 +699,13 @@ export default function Messages({ isWidget = false, initialChatId }: { isWidget
                       <div className={cn(
                         "relative shadow-sm whitespace-pre-wrap leading-relaxed w-fit break-words",
                         isAI 
-                          ? "bg-gradient-to-br from-indigo-900/30 to-blue-900/10 text-white rounded-2xl border border-indigo-500/20 w-full p-4 md:p-5" 
+                           ? "bg-[#18181b] text-white rounded-2xl border border-white/10 w-full p-4 md:p-5 shadow-xl" 
                           : (isMe
                             ? "bg-brand-green text-white rounded-[18px] rounded-tr-[4px] px-4 py-2.5 text-[15px]" 
                             : "bg-[#27272a] text-gray-100 rounded-[18px] rounded-tl-[4px] border border-white/5 px-4 py-2.5 text-[15px]")
                       )}>
                         {isAI && (
-                          <div className="flex items-center gap-2 mb-3 text-indigo-400 font-bold border-b border-indigo-500/20 pb-2">
+                          <div className="flex items-center gap-2 mb-3 text-brand-green font-bold border-b border-white/10 pb-2">
                             <Bot size={16} />
                             <span>الخبير الآلي (Market Auto DZ)</span>
                           </div>
