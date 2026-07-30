@@ -535,11 +535,11 @@ export default function Messages({ isWidget = false, initialChatId }: { isWidget
 
         {/* Chat Area */}
         <div className={cn(
-          "flex-1 flex flex-col transition-all duration-300 relative h-full min-w-0 w-full",
+          "flex-1 flex flex-col transition-all duration-300 relative h-full min-w-0 min-h-0 w-full",
           !activeChat ? "hidden md:flex" : "flex"
         )}>
           {activeChat ? (
-            <div className="flex-1 flex flex-col min-w-0">
+            <div className="flex-1 flex flex-col min-w-0 min-h-0">
               <div className="p-4 md:p-6 border-b border-white/10 flex items-center justify-between bg-[#0a0a0a]/50 backdrop-blur-md">
                 <div className="flex items-center gap-4">
                   <button 
